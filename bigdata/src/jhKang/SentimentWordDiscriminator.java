@@ -8,7 +8,7 @@ import java.util.StringTokenizer;
 
 public class SentimentWordDiscriminator {
 	private String sentiURL = "http://api.openhangul.com/dic?api_key=";
-	private String key = "jinhuk131320151017194558";
+	private String key = "jinhuk131320151017194558";//"yooraekyoung20151020225203";
 	private URL sentiWordRequestURL = null;
 	private BufferedReader input = null;	
 	private String responseString;
@@ -29,6 +29,10 @@ public class SentimentWordDiscriminator {
 					StringTokenizer token = new StringTokenizer(responseString, "\"");
 					while(token.hasMoreTokens()){
 						tokenWord = token.nextToken();			//offset -> 3 원형, -> 7 명사, -> 11 sentiType, ->15 score
+						if(offset == 1 && tokenWord.equals("message")){
+							sentimentWord.errorMsg = "error"; 
+							return sentimentWord;
+						}
 						if(offset == 3 && tokenWord.equals(": ") == false)
 							sentimentWord.originWord = tokenWord;						
 						else if(offset == 7 && tokenWord.equals(": ") == false)

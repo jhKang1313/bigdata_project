@@ -5,6 +5,7 @@ public class SentimentWord {
 	public String wordType;
 	public SentimentType sentimentType;
 	public int sentimentScore;
+	public String errorMsg;
 	public SentimentWord(String originWord, String wordType, int sentimentType, int sentimentScore){
 		this.originWord = originWord;
 		this.wordType = wordType;
