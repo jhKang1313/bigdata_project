@@ -1,0 +1,44 @@
+package jhKang;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.StringTokenizer;
+
+public class OriginWordDiscriminator {
+	private final String requestURL = "http://api.openhangul.com/basic?q=";
+	private URL originWordRequestURL = null;
+	private BufferedReader input = null;		//BufferedReader의 변수명을 reader라 하면 안되네.
+	private String responseString;			
+	private StringTokenizer token;
+	private String word;
+	private MyDataBase data;
+	public OriginWordDiscriminator(MyDataBase data){
+		this.data = data;
+	}
+	public OriginWord requestOriginWord(String text){
+		try{
+			originWordRequestURL = new URL("http://api.openhangul.com/basic?q=" + URLEncoder.encode(text, "UTF-8"));
+			input = new BufferedReader(new InputStreamReader(originWordRequestURL.openStream(), "UTF-8"));
+			for(int i = 0 ;(responseString = input.readLine()) != null; i++){
+				if(i == 6){
+					token = new StringTokenizer(responseString, "\"");
+					int offset = 0;
+					while(token.hasMoreTokens()){
+						word = token.nextToken();
+						if(offset == 7){
+							if(word.equals(", ") == true)
+								return null;
+							else
+								return new OriginWord(text, word);
+						}
+						offset++;
+					}
+				}
+			}
+		}
+		catch(Exception e){}
+		return null;
+	}
+}
