@@ -13,10 +13,6 @@ public class OriginWordDiscriminator {
 	private String responseString;			
 	private StringTokenizer token;
 	private String word;
-	private MyDataBase data;
-	public OriginWordDiscriminator(MyDataBase data){
-		this.data = data;
-	}
 	public OriginWord requestOriginWord(String text){
 		try{
 			originWordRequestURL = new URL("http://api.openhangul.com/basic?q=" + URLEncoder.encode(text, "UTF-8"));

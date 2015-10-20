@@ -8,48 +8,95 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.StringTokenizer;
 public class MyDataBase{
-	private String articleContent;
-	private String exceptCharRegex = "[^a-zA-Z°¡-ÆR ]*"; 
-	private String text;
-	private OriginWordDiscriminator originWordDisc = new OriginWordDiscriminator(this);
-	private SentimentWordDiscriminator sentiWordDisc = new SentimentWordDiscriminator();
-	private Connection con;
-	private OriginWord originWord;
-	public void test() throws ClassNotFoundException, SQLException{
-		con = new MyConnection().getConnection();
-		PreparedStatement ps = con.prepareStatement("select article_content from article_table");
-		ResultSet rs = ps.executeQuery();
+	
+	private Connection connection;
+	private PreparedStatement articlePreparedStatement;
+	private ResultSet articleResultSet;
+	private PreparedStatement preparedStatement;
+	private ResultSet resultSet;
+	
+	public MyDataBase() throws ClassNotFoundException, SQLException{
+		connection = new MyConnection().getConnection();
+		this.articlePreparedStatement = this.connection.prepareStatement("select * from article_table");
+		this.articleResultSet = this.articlePreparedStatement.executeQuery();
 		
-		rs.next();	
-		articleContent = rs.getString("article_content");	
-		articleContent = articleContent.replaceAll(exceptCharRegex, "");	//Æ¯¼ö¹®ÀÚ Á¦°Å
-		StringTokenizer token = new StringTokenizer(articleContent, " ");
-		while(token.hasMoreTokens()){
-			text = token.nextToken();
-			originWord = originWordDisc.requestOriginWord(text);
-			sentiWordDisc.sentimentWordRequest(originWord);
+	}
+	public void myDataBaseClose() throws ClassNotFoundException, SQLException{
+		articleResultSet.close();
+		resultSet.close();
+		articlePreparedStatement.clearParameters();
+		preparedStatement.clearParameters();
+		connection.close();	
+	}
+	public String getArticle() throws ClassNotFoundException, SQLException{
+		if(articleResultSet.next()){
+			if(articleResultSet.getInt("posi_word_count") != 0 && articleResultSet.getInt("nega_word_count") != 0 && articleResultSet.getInt("non_word_count") != 0)
+				return "continue";
+			else
+				return articleResultSet.getString("article_content");	//Æ¯¼ö¹®ÀÚ Á¦°Å
 		}
-		
-		rs.close();
-		ps.clearParameters();
-		con.close();
+		else
+			return "exit";
+	}
+	public void addSentimentWordCount(SentimentWordCounter count, String article) throws ClassNotFoundException, SQLException{
+		preparedStatement = this.connection.prepareStatement("update article_table set posi_word_count=?, nega_word_count=?, non_word_count=? where article_content=?");
+		preparedStatement.setInt(1, count.positiveWordCount);
+		preparedStatement.setInt(2, count.negativeWordCount);
+		preparedStatement.setInt(3, count.nonSentiWordCount);
+		preparedStatement.setString(4, article);
+		preparedStatement.executeUpdate();
 		
 	}
-	public void addOriginWordRecord() throws ClassNotFoundException, SQLException{
-		PreparedStatement ps = con.prepareStatement("insert into originword_table(text, origin_word) values (?,?)");
-		ps.setString(1, originWord.text);
-		ps.setString(2, originWord.originWord);
-		
+	public boolean searchOriginWord(String text) throws ClassNotFoundException, SQLException{
+		preparedStatement = this.connection.prepareStatement("select count(*) from originword_table where text=?");
+		preparedStatement.setString(1, text);
+		resultSet = preparedStatement.executeQuery();
+		resultSet.next();
+		if(resultSet.getInt(1) != 0)
+			return true;
+		else 
+			return false;
+	}
+	public OriginWord getOriginWord(String text) throws ClassNotFoundException, SQLException{
+		preparedStatement = this.connection.prepareStatement("select * from originword_table where text=?");
+		preparedStatement.setString(1, text);
+		resultSet = preparedStatement.executeQuery();
+		resultSet.next();
+		OriginWord originWord = new OriginWord(text, resultSet.getString("origin_word"));
+		return originWord;
+	}
+	public boolean searchSentimentWord(String originWord) throws ClassNotFoundException, SQLException{
+		this.preparedStatement = this.connection.prepareStatement("select count(*) from sentimentword_table where origin_word=?");
+		preparedStatement.setString(1, originWord);
+		resultSet = preparedStatement.executeQuery();
+		resultSet.next();
+		if(resultSet.getInt(1) != 0)
+			return true;
+		else 
+			return false;
+	}
+	public SentimentWord getSentimentWord(String originWord) throws ClassNotFoundException, SQLException{
+		this.preparedStatement = this.connection.prepareStatement("select * from sentimentword_table where origin_word=?");
+		preparedStatement.setString(1, originWord);
+		resultSet = preparedStatement.executeQuery();
+		resultSet.next();
+		return new SentimentWord(resultSet.getString("origin_word"), resultSet.getString("word_type"), resultSet.getInt("sentiment_type"), resultSet.getInt("sentiment_score"));
 		
 	}
-	public void addSentiWordRecord() throws ClassNotFoundException, SQLException{
-		PreparedStatement ps = con.prepareStatement("insert into sentimentword_table(text, origin_word) values (?,?)");
+	public void addOriginWordRecord(OriginWord originWord) throws ClassNotFoundException, SQLException{
+		preparedStatement = this.connection.prepareStatement("insert into originword_table(text, origin_word) values (?,?)");
+		preparedStatement.setString(1, originWord.text);
+		preparedStatement.setString(2, originWord.originWord);
 		
+		preparedStatement.executeUpdate();
+	}
+	public void addSentiWordRecord(SentimentWord sentiWord) throws ClassNotFoundException, SQLException{
+		preparedStatement = this.connection.prepareStatement("insert into sentimentword_table(origin_word, word_type, sentiment_type, sentiment_score) values (?,?,?,?)");
+		preparedStatement.setString(1, sentiWord.originWord);
+		preparedStatement.setString(2, sentiWord.wordType);
+		preparedStatement.setInt(3, sentiWord.sentimentType.ordinal());
+		preparedStatement.setInt(4, sentiWord.sentimentScore);
 		
+		preparedStatement.executeUpdate();
 	}
-	public static void main(String[] args) throws ClassNotFoundException, SQLException{
-		MyDataBase data = new MyDataBase();
-		data.test();
-	}
-
 }

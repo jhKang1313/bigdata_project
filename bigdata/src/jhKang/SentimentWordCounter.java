@@ -13,4 +13,9 @@ public class SentimentWordCounter {
 		
 		
 	}
+	public void reset(){
+		this.positiveWordCount = 0;
+		this.negativeWordCount = 0;
+		this.nonSentiWordCount = 0;
+	}
 }
