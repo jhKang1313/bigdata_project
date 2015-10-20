@@ -35,7 +35,7 @@ public class MyExecutor extends Thread{
 					continue;
 				wordCounter.reset();
 				originArticleContent = articleContent;
-				articleContent = articleContent.replaceAll(exceptCharRegex, " ");
+				articleContent = articleContent.replaceAll(exceptCharRegex, "");
 				StringTokenizer token = new StringTokenizer(articleContent, " ");
 				while(token.hasMoreTokens()){
 					originWord = null;

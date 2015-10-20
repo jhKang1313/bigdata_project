@@ -8,7 +8,7 @@ import java.util.StringTokenizer;
 
 public class SentimentWordDiscriminator {
 	private String sentiURL = "http://api.openhangul.com/dic?api_key=";
-	private String key = "jinhuk131320151017194558";//"yooraekyoung20151020225203";
+	private String key = "tjfdydgkr20151021004723";//"yooraekyoung20151020225203";
 	private URL sentiWordRequestURL = null;
 	private BufferedReader input = null;	
 	private String responseString;
