@@ -9,9 +9,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 public class MyExecutor extends Thread{
 	private MyDataBase db;
+	private String apiKey;
 	private String exceptCharRegex = "[^a-zA-Z°¡-ÆR ]*"; 
 	private OriginWordDiscriminator originWordDisc = new OriginWordDiscriminator();
-	private SentimentWordDiscriminator sentiWordDisc = new SentimentWordDiscriminator();
+	private SentimentWordDiscriminator sentiWordDisc;
 	private SentimentWordCounter wordCounter = new SentimentWordCounter();
 	private OriginWord originWord;
 	private SentimentWord sentimentWord;
@@ -21,10 +22,12 @@ public class MyExecutor extends Thread{
 	private Condition exit;
 	private Lock key;
 	private Logger log = new Logger();
-	public MyExecutor(MyDataBase db, Condition exit, Lock key){
+	public MyExecutor(MyDataBase db, Condition exit, Lock key, String apiKey){
 		this.db = db;
 		this.exit = exit;
 		this.key = key;
+		this.apiKey = apiKey;
+		sentiWordDisc  = new SentimentWordDiscriminator(apiKey);
 	}
 	public void run(){
 		try{
@@ -58,23 +61,6 @@ public class MyExecutor extends Thread{
 							continue;
 						}
 					}
-					/*else if(db.searchOriginWord2(tokenWord)){	//µðºñ1¿¡ ¿øÇü ´Ü¾î Á¸Àç.
-						originWord = db.getOriginWord2(tokenWord);
-						if(db.searchSentimentWord2(originWord.originWord)){
-							log.show(tokenWord+"\tDB Å½»ö\t¼º°ø");
-							sentimentWord = db.getSentimentWord2(originWord.originWord);
-							if(sentimentWord.sentimentType == SentimentType.NE_SENTI_WORD)
-								wordCounter.negativeWordCount++;
-							else if(sentimentWord.sentimentType == SentimentType.PO_SENTI_WORD)
-								wordCounter.positiveWordCount++;
-							else
-								wordCounter.nonSentiWordCount++;
-						}
-						else{
-							log.show(tokenWord+"\t°¨¼º¾îÈÖ DBÅ½»ö ½ÇÆÐ");
-							continue;
-						}	
-					}*/
 					else{				//µðºñ¿¡ ¿øÇü ´Ü¾î Á¸ÀçÇÏÁö ¾ÊÀ½
 						originWord = originWordDisc.requestOriginWord(tokenWord);
 						if(originWord != null){
@@ -94,22 +80,6 @@ public class MyExecutor extends Thread{
 									log.show(tokenWord+"\t°¨¼º ¾îÈÖ DBÅ½»ö ½ÇÆÐ");
 								
 							}
-							/*else if(db.searchSentimentWord2(originWord.originWord)){
-								sentimentWord = db.getSentimentWord2(originWord.originWord);
-								if(sentimentWord != null){
-									db.addOriginWordRecord(originWord);
-									if(sentimentWord.sentimentType == SentimentType.NE_SENTI_WORD)
-										wordCounter.negativeWordCount++;
-									else if(sentimentWord.sentimentType == SentimentType.PO_SENTI_WORD)
-										wordCounter.positiveWordCount++;
-									else
-										wordCounter.nonSentiWordCount++;
-									log.show(tokenWord+"\tDB Å½»ö\t¼º°ø");
-								}
-								else
-									log.show(tokenWord+"\t°¨¼º ¾îÈÖ DBÅ½»ö ½ÇÆÐ");
-								
-							}*/
 							else{
 								sentimentWord = sentiWordDisc.sentimentWordRequest(originWord);
 								if(sentimentWord != null){
@@ -146,7 +116,7 @@ public class MyExecutor extends Thread{
 		}
 	}
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException{
-		Lock key = new ReentrantLock();
+		/*Lock key = new ReentrantLock();
 		Condition exitCondition = key.newCondition();
 		MyDataBase db = new MyDataBase();
 		ExecutorService exec = Executors.newCachedThreadPool();
@@ -164,7 +134,7 @@ public class MyExecutor extends Thread{
 	
 		exec.shutdown();
 		db.myDataBaseClose();
-		System.out.println("µðºñ ´ÝÀ½");
+		System.out.println("µðºñ ´ÝÀ½");*/
 	
 	}
 }
