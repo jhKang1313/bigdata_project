@@ -22,6 +22,7 @@ public class MyExecutor extends Thread{
 	private Condition exit;
 	private Lock key;
 	private Logger log = new Logger();
+	private StringTokenizer token;
 	public MyExecutor(MyDataBase db, Condition exit, Lock key, String apiKey){
 		this.db = db;
 		this.exit = exit;
@@ -33,18 +34,18 @@ public class MyExecutor extends Thread{
 		try{
 			//--여기부터 반복 시작
 			while(!(articleContent = db.getArticle()).equals("exit")){
-				log.show("-------------------기사 읽기------------------");
+				log.show("---B----------------기사 읽기------------------");
 				if(articleContent.equals("continue"))
 					continue;
 				wordCounter.reset();
 				originArticleContent = articleContent;
 				articleContent = articleContent.replaceAll(exceptCharRegex, "");
-				StringTokenizer token = new StringTokenizer(articleContent, " ");
+				token = new StringTokenizer(articleContent, " ");
 				while(token.hasMoreTokens()){
 					originWord = null;
 					sentimentWord = null;
 					tokenWord = token.nextToken();
-					if(db.searchOriginWord(tokenWord)){	//디비1에 원형 단어 존재.
+					if(db.searchOriginWord(tokenWord)){	//디비에 원형 단어 존재.
 						originWord = db.getOriginWord(tokenWord);
 						if(db.searchSentimentWord(originWord.originWord)){
 							log.show(tokenWord+"\tDB 탐색\t성공");
@@ -114,27 +115,5 @@ public class MyExecutor extends Thread{
 			e.printStackTrace();
 			log.show("-----------오류 발생----------");	
 		}
-	}
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, InterruptedException{
-		/*Lock key = new ReentrantLock();
-		Condition exitCondition = key.newCondition();
-		MyDataBase db = new MyDataBase();
-		ExecutorService exec = Executors.newCachedThreadPool();
-		exec.execute(new MyExecutor(db,exitCondition, key));
-		exec.execute(new MyExecutor(db,exitCondition, key));
-		exec.execute(new MyExecutor(db,exitCondition, key));
-		exec.execute(new MyExecutor(db,exitCondition, key));
-		exec.execute(new MyExecutor(db,exitCondition, key));
-		exec.execute(new MyExecutor(db,exitCondition, key));
-		
-		
-		key.lock();
-		exitCondition.await();
-		key.unlock();
-	
-		exec.shutdown();
-		db.myDataBaseClose();
-		System.out.println("디비 닫음");*/
-	
 	}
 }

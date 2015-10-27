@@ -1,6 +1,7 @@
 package jhKang;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -13,10 +14,12 @@ public class OriginWordDiscriminator {
 	private String responseString;			
 	private StringTokenizer token;
 	private String word;
+	private InputStreamReader stream;
 	public OriginWord requestOriginWord(String text){
 		try{
 			originWordRequestURL = new URL("http://api.openhangul.com/basic?q=" + URLEncoder.encode(text, "UTF-8"));
-			input = new BufferedReader(new InputStreamReader(originWordRequestURL.openStream(), "UTF-8"));
+			stream = new InputStreamReader(originWordRequestURL.openStream(), "UTF-8");
+			input = new BufferedReader(stream);
 			for(int i = 0 ;(responseString = input.readLine()) != null; i++){
 				if(i == 6){
 					token = new StringTokenizer(responseString, "\"");
@@ -24,10 +27,14 @@ public class OriginWordDiscriminator {
 					while(token.hasMoreTokens()){
 						word = token.nextToken();
 						if(offset == 7){
-							if(word.equals(", ") == true)
+							if(word.equals(", ") == true){
+								cleanUp();
 								return null;
-							else
+							}
+							else{
+								cleanUp();
 								return new OriginWord(text, word);
+							}
 						}
 						offset++;
 					}
@@ -36,5 +43,9 @@ public class OriginWordDiscriminator {
 		}
 		catch(Exception e){}
 		return null;
+	}
+	public void cleanUp() throws IOException{
+		this.stream.close();
+		this.input.close();
 	}
 }

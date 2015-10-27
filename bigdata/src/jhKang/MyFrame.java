@@ -33,7 +33,7 @@ public class MyFrame extends JFrame{
 				"yoo1020151021185026:yoo10/930909",
 				"yoo1120151021185106:yoo11/930909",
 				"yoo1220151021185143:yoo12/930909",
-		"yoo1320151021185222:yoo13/930909"};
+				"yoo1320151021185222:yoo13/930909"};
 		JComboBox combo = new JComboBox(key);
 		combo.setVisible(true);
 		this.add(combo);
@@ -71,6 +71,7 @@ public class MyFrame extends JFrame{
 						db.myDataBaseClose();
 						System.out.println("µðºñ ´ÝÀ½");
 						combo.setSelectedIndex(++comboIndex);
+			
 					}
 				}catch(Exception e){
 					e.printStackTrace();
