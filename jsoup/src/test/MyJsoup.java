@@ -22,7 +22,7 @@ class CSVFormat{
 }
 public class MyJsoup{
 	public String field = "날짜, URL, 분류, 내용 \r\n";
-	public String csvFileName = "c:/eco2015.csv";
+	public String csvFileName = "c:/Users/Jinhyuk/Desktop/eco2015.csv";
 	public String dateTag = "BUILD";
 	public String category = "KEYWORDS";
 	private CSVFormat format = new CSVFormat();
@@ -36,7 +36,7 @@ public class MyJsoup{
 		
 	}
 	public void run(){//54500
-		for(int i = 1 ; i< 65000 ; i++){
+		for(int i = 65000 ; i< 70000 ; i++){
 			format.resetData();
 			try{
 				setURL(i);
