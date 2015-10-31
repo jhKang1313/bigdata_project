@@ -106,6 +106,8 @@ public class MyExecutor extends Thread{
 				System.out.println("Ne : " + wordCounter.negativeWordCount);
 				System.out.println("No : " + wordCounter.nonSentiWordCount);
 				db.addSentimentWordCount(wordCounter, originArticleContent);
+				articleContent = null;
+				originArticleContent = null;
 			}
 		}catch(Exception e){
 			e.printStackTrace();

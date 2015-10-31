@@ -10,7 +10,6 @@ public class MyDataBase{
 	private ResultSet articleResultSet;
 	private PreparedStatement preparedStatement;
 	private ResultSet resultSet;
-	
 	public MyDataBase() throws ClassNotFoundException, SQLException{
 		connection = new MyConnection().getConnection();
 		this.articlePreparedStatement = this.connection.prepareStatement("select * from article_table");
@@ -27,10 +26,13 @@ public class MyDataBase{
 	synchronized
 	public String getArticle() throws ClassNotFoundException, SQLException{
 		if(articleResultSet.next()){
-			if(articleResultSet.getInt("non_word_count") != 0)
+			int resultInt = articleResultSet.getInt("non_word_count");
+			if(resultInt != 0)
 				return "continue";
-			else
-				return articleResultSet.getString("article_content");
+			else{
+				String resultString = articleResultSet.getString("article_content");
+				return resultString;
+			}
 		}
 		else
 			return "exit";
@@ -51,7 +53,8 @@ public class MyDataBase{
 		preparedStatement.setString(1, text);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
-		if(resultSet.getInt(1) != 0)
+		int resultInt = resultSet.getInt(1);
+		if(resultInt != 0)
 			return true;
 		else 
 			return false;
@@ -63,7 +66,8 @@ public class MyDataBase{
 		preparedStatement.setString(1, text);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
-		OriginWord originWord = new OriginWord(text, resultSet.getString("origin_word"));
+		String resultString = resultSet.getString("origin_word");
+		OriginWord originWord = new OriginWord(text, resultString);
 		return originWord;
 	}
 	synchronized
@@ -72,7 +76,8 @@ public class MyDataBase{
 		preparedStatement.setString(1, originWord);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
-		if(resultSet.getInt(1) != 0)
+		int resultInt = resultSet.getInt(1);
+		if(resultInt != 0)
 			return true;
 		else 
 			return false;
@@ -83,7 +88,11 @@ public class MyDataBase{
 		preparedStatement.setString(1, originWord);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
-		SentimentWord sentimentWord = new SentimentWord(resultSet.getString("origin_word"), resultSet.getString("word_type"), resultSet.getInt("sentiment_type"), resultSet.getInt("sentiment_score"));
+		String resultOriginWord = resultSet.getString("origin_word");
+		String resultWordType = resultSet.getString("word_type");
+		int resultSentiType = resultSet.getInt("sentiment_type");
+		int resultSentiScore = resultSet.getInt("sentiment_score");
+		SentimentWord sentimentWord = new SentimentWord(resultOriginWord, resultWordType , resultSentiType, resultSentiScore);
 		return sentimentWord;
 		
 	}
