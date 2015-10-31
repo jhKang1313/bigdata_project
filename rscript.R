@@ -20,52 +20,26 @@ str(weather.sales.data)
 View(weather.sales.data)
 
 
-#-------기사-----------
+#-------기사 개수 -----------
 article.data <- read.csv("article_data.csv") #article_data.csv 파일 읽기  -> 기사 내용으로 인해 파일 크기가 커서 파일을 제대로 못 읽어옴 -> 내용은 중요하지 않기 때문에 날ㄹ
 article.count <- table(article.data$날짜, article.data$분류)   #날짜에 따른 경제면, 사회면 기사 개수
 article.count <- as.data.frame.matrix(article.count)  #table -> dataframe 변환
-article.count$날짜 <- levels(article.data$날짜) #날짜 column 추가
-weather.sales.article.data <- weather.sales.data
+article.count <- data.frame(경제 = c(NA, article.count[,1]),사회 = c(NA, article.count[,2])) #2013년 1월 1일 신문 기사 수집이 안되기 때문에 그 날 기사 수를 NA로 설정
 
-
-article.count.eco <- c()
-article.count.sco
-for(i in 1:nrow(weather.sales.data)){
-  for(j in 1:nrow(article.count)){
-    if(weather.sales.data$날짜[i] == article.count$날짜[j]){
-      article.count.eco <- c(article.count.eco, article.count$경제[j])
-      print(i)
-      break
-    }
-  }
-  if(j == nrow(article.count)){
-    article.count.eco <- c(article.count.eco, 0)
-  }
-}
-article.count.eco
-weather.sales.article.data$경제 <- article.count.eco
+weather.sales.article.data <- weather.sales.data    #기사 수 추가된 dataframe 생성
+weather.sales.article.data$경제기사수 <- article.count$경제 #경제 기사 수 추가
+weather.sales.article.data$사회기사수 <- article.count$사회 #사회 기사 수 추가
+weather.sales.article.data$총기사수 <- rowSums(article.count[,1:2], na.rm = TRUE) #총 기사 수 추가
 View(weather.sales.article.data)
+str(weather.sales.article.data)
 
-article.count$날짜 == article.data$날짜
-str(article.count)
-data1 <- data.frame(article.data$날짜, 경제 = as.vector(article.count[,1]) , 사회 = as.vector(article.count[,2]))
+#-------분 석-----------
+weather.sales.article.data
+cor(weather.sales.article.data[,3:13], , use = "pairwise.complete.obs")
+cor(weather.sales.article.data$사회기사수, weather.sales.article.data$매출, use = "pairwise.complete.obs")
 
-name
-article.count[weather.sales.article.data$날짜 == article.count[,0],1]
-str(article.count)
-levels(weather.sales.data$날짜)
-str(article.count)
-data <- data.frame(weather.sales.data$날짜)#, article.count)
-tapply(article.data$날짜, weather.sales.data$날짜, equal)   
-View(article.data)
-str(article.data)
-
-
-
-
-
-
-
+m <- lm(매출 ~ 총기사수, weather.sales.article.data)
+summary(m)
 
 
 
