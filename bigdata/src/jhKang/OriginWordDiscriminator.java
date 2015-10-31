@@ -17,7 +17,7 @@ public class OriginWordDiscriminator {
 	private InputStreamReader stream;
 	public OriginWord requestOriginWord(String text){
 		try{
-			originWordRequestURL = new URL("http://api.openhangul.com/basic?q=" + URLEncoder.encode(text, "UTF-8"));
+			originWordRequestURL = new URL(requestURL + URLEncoder.encode(text, "UTF-8"));
 			stream = new InputStreamReader(originWordRequestURL.openStream(), "UTF-8");
 			input = new BufferedReader(stream);
 			for(int i = 0 ;(responseString = input.readLine()) != null; i++){

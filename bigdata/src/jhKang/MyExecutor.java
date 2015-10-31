@@ -1,12 +1,8 @@
 package jhKang;
 
-import java.sql.SQLException;
 import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 public class MyExecutor extends Thread{
 	private MyDataBase db;
 	private String apiKey;
@@ -34,12 +30,12 @@ public class MyExecutor extends Thread{
 		try{
 			//--여기부터 반복 시작
 			while(!(articleContent = db.getArticle()).equals("exit")){
-				log.show("---B----------------기사 읽기------------------");
+				log.show("-------------------기사 읽기------------------");
 				if(articleContent.equals("continue"))
 					continue;
 				wordCounter.reset();
 				originArticleContent = articleContent;
-				articleContent = articleContent.replaceAll(exceptCharRegex, "");
+				articleContent = articleContent.replaceAll(exceptCharRegex, "");	//특수 문자 제거
 				token = new StringTokenizer(articleContent, " ");
 				while(token.hasMoreTokens()){
 					originWord = null;

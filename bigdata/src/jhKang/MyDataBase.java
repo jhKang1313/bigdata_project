@@ -1,16 +1,11 @@
 package jhKang;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.StringTokenizer;
 public class MyDataBase{
 	
 	private Connection connection;
-	private Connection connection2;
 	private PreparedStatement articlePreparedStatement;
 	private ResultSet articleResultSet;
 	private PreparedStatement preparedStatement;
@@ -32,10 +27,10 @@ public class MyDataBase{
 	synchronized
 	public String getArticle() throws ClassNotFoundException, SQLException{
 		if(articleResultSet.next()){
-			if(articleResultSet.getInt("posi_word_count") != 0 && articleResultSet.getInt("nega_word_count") != 0 && articleResultSet.getInt("non_word_count") != 0)
+			if(articleResultSet.getInt("non_word_count") != 0)
 				return "continue";
 			else
-				return articleResultSet.getString("article_content");	//특수문자 제거
+				return articleResultSet.getString("article_content");
 		}
 		else
 			return "exit";
