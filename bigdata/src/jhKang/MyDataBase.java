@@ -26,8 +26,8 @@ public class MyDataBase{
 	public void myDataBaseClose() throws ClassNotFoundException, SQLException{
 		articleResultSet.close();
 		resultSet.close();
-		articlePreparedStatement.clearParameters();
-		preparedStatement.clearParameters();
+		articlePreparedStatement.close();
+		preparedStatement.close();
 		connection.close();	
 	}
 	synchronized
@@ -52,6 +52,7 @@ public class MyDataBase{
 		preparedStatement.setInt(3, count.nonSentiWordCount);
 		preparedStatement.setString(4, article);
 		preparedStatement.executeUpdate();
+		preparedStatement.close();
 		
 	}
 	synchronized
@@ -61,6 +62,8 @@ public class MyDataBase{
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
 		int resultInt = resultSet.getInt(1);
+		resultSet.close();
+		preparedStatement.close();
 		if(resultInt != 0)
 			return true;
 		else 
@@ -76,6 +79,8 @@ public class MyDataBase{
 		String resultString = resultSet.getString("origin_word");
 		OriginWord originWord = new OriginWord(text, resultString);
 		resultString = null;
+		resultSet.close();
+		preparedStatement.close();
 		return originWord;
 	}
 	synchronized
@@ -85,6 +90,8 @@ public class MyDataBase{
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
 		int resultInt = resultSet.getInt(1);
+		resultSet.close();
+		preparedStatement.close();
 		if(resultInt != 0)
 			return true;
 		else 
@@ -103,6 +110,8 @@ public class MyDataBase{
 		SentimentWord sentimentWord = new SentimentWord(resultOriginWord, resultWordType , resultSentiType, resultSentiScore);
 		resultOriginWord = null;
 		resultWordType = null;
+		resultSet.close();
+		preparedStatement.close();
 		return sentimentWord;
 		
 	}
@@ -111,8 +120,9 @@ public class MyDataBase{
 		preparedStatement = this.connection.prepareStatement(addOriginWordRecordQuery);
 		preparedStatement.setString(1, originWord.text);
 		preparedStatement.setString(2, originWord.originWord);
-		
 		preparedStatement.executeUpdate();
+		
+		preparedStatement.close();
 	}
 	synchronized
 	public void addSentiWordRecord(SentimentWord sentiWord) throws ClassNotFoundException, SQLException{
@@ -121,7 +131,8 @@ public class MyDataBase{
 		preparedStatement.setString(2, sentiWord.wordType);
 		preparedStatement.setInt(3, sentiWord.sentimentType.ordinal());
 		preparedStatement.setInt(4, sentiWord.sentimentScore);
-		
 		preparedStatement.executeUpdate();
+		
+		preparedStatement.close();
 	}
 }
