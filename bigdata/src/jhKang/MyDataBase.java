@@ -10,6 +10,13 @@ public class MyDataBase{
 	private ResultSet articleResultSet;
 	private PreparedStatement preparedStatement;
 	private ResultSet resultSet;
+	private String addSentimentWordCountQuery = "update article_table set posi_word_count=?, nega_word_count=?, non_word_count=? where article_content=?";
+	private String searchOriginWordQuery = "select count(*) from originword_table where text=?";
+	private String getOriginWordQuery = "select * from originword_table where text=?";
+	private String searchSentimentWordQuery = "select count(*) from sentimentword_table where origin_word=?";
+	private String getSentimentWordQuery = "select * from sentimentword_table where origin_word=?";
+	private String addOriginWordRecordQuery = "insert into originword_table(text, origin_word) values (?,?)";
+	private String addSentiWordRecordQuery = "insert into sentimentword_table(origin_word, word_type, sentiment_type, sentiment_score) values (?,?,?,?)";
 	public MyDataBase() throws ClassNotFoundException, SQLException{
 		connection = new MyConnection().getConnection();
 		this.articlePreparedStatement = this.connection.prepareStatement("select * from article_table");
@@ -39,7 +46,7 @@ public class MyDataBase{
 	}
 	synchronized
 	public void addSentimentWordCount(SentimentWordCounter count, String article) throws ClassNotFoundException, SQLException{
-		preparedStatement = this.connection.prepareStatement("update article_table set posi_word_count=?, nega_word_count=?, non_word_count=? where article_content=?");
+		preparedStatement = this.connection.prepareStatement(addSentimentWordCountQuery);
 		preparedStatement.setInt(1, count.positiveWordCount);
 		preparedStatement.setInt(2, count.negativeWordCount);
 		preparedStatement.setInt(3, count.nonSentiWordCount);
@@ -49,7 +56,7 @@ public class MyDataBase{
 	}
 	synchronized
 	public boolean searchOriginWord(String text) throws ClassNotFoundException, SQLException{
-		preparedStatement = this.connection.prepareStatement("select count(*) from originword_table where text=?");
+		preparedStatement = this.connection.prepareStatement(searchOriginWordQuery);
 		preparedStatement.setString(1, text);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
@@ -62,17 +69,18 @@ public class MyDataBase{
 	
 	synchronized
 	public OriginWord getOriginWord(String text) throws ClassNotFoundException, SQLException{
-		preparedStatement = this.connection.prepareStatement("select * from originword_table where text=?");
+		preparedStatement = this.connection.prepareStatement(getOriginWordQuery);
 		preparedStatement.setString(1, text);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
 		String resultString = resultSet.getString("origin_word");
 		OriginWord originWord = new OriginWord(text, resultString);
+		resultString = null;
 		return originWord;
 	}
 	synchronized
 	public boolean searchSentimentWord(String originWord) throws ClassNotFoundException, SQLException{
-		this.preparedStatement = this.connection.prepareStatement("select count(*) from sentimentword_table where origin_word=?");
+		this.preparedStatement = this.connection.prepareStatement(searchSentimentWordQuery);
 		preparedStatement.setString(1, originWord);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
@@ -84,7 +92,7 @@ public class MyDataBase{
 	}
 	synchronized
 	public SentimentWord getSentimentWord(String originWord) throws ClassNotFoundException, SQLException{
-		this.preparedStatement = this.connection.prepareStatement("select * from sentimentword_table where origin_word=?");
+		this.preparedStatement = this.connection.prepareStatement(getSentimentWordQuery);
 		preparedStatement.setString(1, originWord);
 		resultSet = preparedStatement.executeQuery();
 		resultSet.next();
@@ -93,12 +101,14 @@ public class MyDataBase{
 		int resultSentiType = resultSet.getInt("sentiment_type");
 		int resultSentiScore = resultSet.getInt("sentiment_score");
 		SentimentWord sentimentWord = new SentimentWord(resultOriginWord, resultWordType , resultSentiType, resultSentiScore);
+		resultOriginWord = null;
+		resultWordType = null;
 		return sentimentWord;
 		
 	}
 	synchronized
 	public void addOriginWordRecord(OriginWord originWord) throws ClassNotFoundException, SQLException{
-		preparedStatement = this.connection.prepareStatement("insert into originword_table(text, origin_word) values (?,?)");
+		preparedStatement = this.connection.prepareStatement(addOriginWordRecordQuery);
 		preparedStatement.setString(1, originWord.text);
 		preparedStatement.setString(2, originWord.originWord);
 		
@@ -106,7 +116,7 @@ public class MyDataBase{
 	}
 	synchronized
 	public void addSentiWordRecord(SentimentWord sentiWord) throws ClassNotFoundException, SQLException{
-		preparedStatement = this.connection.prepareStatement("insert into sentimentword_table(origin_word, word_type, sentiment_type, sentiment_score) values (?,?,?,?)");
+		preparedStatement = this.connection.prepareStatement(addSentiWordRecordQuery);
 		preparedStatement.setString(1, sentiWord.originWord);
 		preparedStatement.setString(2, sentiWord.wordType);
 		preparedStatement.setInt(3, sentiWord.sentimentType.ordinal());
