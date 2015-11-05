@@ -17,9 +17,12 @@ public class MyDataBase{
 	private String getSentimentWordQuery = "select * from sentimentword_table where origin_word=?";
 	private String addOriginWordRecordQuery = "insert into originword_table(text, origin_word) values (?,?)";
 	private String addSentiWordRecordQuery = "insert into sentimentword_table(origin_word, word_type, sentiment_type, sentiment_score) values (?,?,?,?)";
+
+	private String addNotAvailableWordQuery = "insert into na_table(origin_word) values (?)";
+	private String searchNotAvailableWordQuery = "select count(*) from na_table where origin_word=?";
 	public MyDataBase() throws ClassNotFoundException, SQLException{
 		connection = new MyConnection().getConnection();
-		this.articlePreparedStatement = this.connection.prepareStatement("select * from article_table");
+		this.articlePreparedStatement = this.connection.prepareStatement("select * from article_table where article_date like '%2014%'");
 		this.articleResultSet = this.articlePreparedStatement.executeQuery();
 		
 	}
@@ -53,6 +56,29 @@ public class MyDataBase{
 		preparedStatement.setString(4, article);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
+		
+	}
+	synchronized
+	public void addNotAvailableWord(String origin) throws ClassNotFoundException, SQLException{
+		preparedStatement = this.connection.prepareStatement(addNotAvailableWordQuery);
+		preparedStatement.setString(1,  origin);
+		preparedStatement.executeUpdate();
+		preparedStatement.close();
+	}
+	synchronized
+	public boolean searchNotAvailableWord(String origin) throws ClassNotFoundException, SQLException{
+		preparedStatement = this.connection.prepareStatement(searchNotAvailableWordQuery);
+		preparedStatement.setString(1, origin);
+		resultSet = preparedStatement.executeQuery();
+		resultSet.next();
+		int resultInt = resultSet.getInt(1);
+		resultSet.close();
+		preparedStatement.close();
+		if(resultInt != 0)
+			return true;
+		else
+			return false;
+		
 		
 	}
 	synchronized

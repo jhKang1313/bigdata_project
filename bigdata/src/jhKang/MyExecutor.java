@@ -78,26 +78,33 @@ public class MyExecutor extends Thread{
 								
 							}
 							else{
-								sentimentWord = sentiWordDisc.sentimentWordRequest(originWord);
-								if(sentimentWord != null){
-									if(sentimentWord.errorMsg != null){
-										key.lock();
-										log.show("허용량 초과");
-										exit.signal();
-										key.unlock();
+								if(!db.searchNotAvailableWord(originWord.originWord)){
+									sentimentWord = sentiWordDisc.sentimentWordRequest(originWord);
+									if(sentimentWord != null){
+										if(sentimentWord.errorMsg != null){
+											key.lock();
+											log.show("허용량 초과");
+											exit.signal();
+											key.unlock();
+										}
+										db.addSentiWordRecord(sentimentWord);
+										db.addOriginWordRecord(originWord);
+										if(sentimentWord.sentimentType == SentimentType.NE_SENTI_WORD)
+											wordCounter.negativeWordCount++;
+										else if(sentimentWord.sentimentType == SentimentType.PO_SENTI_WORD)
+											wordCounter.positiveWordCount++;
+										else
+											wordCounter.nonSentiWordCount++;
+										log.show(tokenWord+"\tAPI 탐색\t성공");
 									}
-									db.addSentiWordRecord(sentimentWord);
-									db.addOriginWordRecord(originWord);
-									if(sentimentWord.sentimentType == SentimentType.NE_SENTI_WORD)
-										wordCounter.negativeWordCount++;
-									else if(sentimentWord.sentimentType == SentimentType.PO_SENTI_WORD)
-										wordCounter.positiveWordCount++;
-									else
-										wordCounter.nonSentiWordCount++;
-									log.show(tokenWord+"\tAPI 탐색\t성공");
+									else{
+										db.addNotAvailableWord(originWord.originWord);
+										log.show(tokenWord+"\t감성 어휘 요청 실패");
+									}
 								}
-								else
-									log.show(tokenWord+"\t감성 어휘 요청 실패");
+								else{
+									log.show(tokenWord+"\t판단 불가 단어");
+								}
 							}
 						}
 					}
