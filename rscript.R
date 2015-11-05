@@ -34,14 +34,263 @@ View(weather.sales.article.data)
 str(weather.sales.article.data)
 
 #-------분 석-----------
-weather.sales.article.data
-cor(weather.sales.article.data[,3:13], , use = "pairwise.complete.obs")
-cor(weather.sales.article.data$사회기사수, weather.sales.article.data$매출, use = "pairwise.complete.obs")
-
-m <- lm(매출 ~ 총기사수, weather.sales.article.data)
+View(weather.sales.article.data)
+cor(weather.sales.article.data[,3:13] , use = "pairwise.complete.obs") # 각 column에 대한 상관분석
+m <- lm(매출 ~ 경제기사수+사회기사수, weather.sales.article.data)
 summary(m)
 
 
+#상관분석에 대한 값이 높게 나오지 않는다.
+
+
+m <- lm(매출 ~ 총기사수, weather.sales.article.data)#기사수에 따른 매출 회기 분석
+summary(m)
+#역시 높게 나오지 않는다.
+
+#데이터 수정
+#------계절 추가----
+season.data <- c()
+season.data[grep('201.-(12|01|02)-',weather.sales.article.data$날짜)] <- '겨울' #1, 2, 12월에 해당하는 인덱스에 겨울 저장
+season.data[grep('201.-(03|04|05)-',weather.sales.article.data$날짜)] <- '봄'   #3, 4, 5월은 봄
+season.data[grep('201.-(06|07|08)-',weather.sales.article.data$날짜)] <- '여름'
+season.data[grep('201.-(09|10|11)-',weather.sales.article.data$날짜)] <- '가을'
+
+w.s.a.s.data <- weather.sales.article.data 
+w.s.a.s.data$계절 <- as.factor(season.data) #계절 column 추가
+View(w.s.a.s.data)
+str(w.s.a.s.data)
+
+#-----기온, 매출 월별로 정규화-----
+#----계절 별로 상대적인 온도를 구한다.
+relativeTemp <- c()
+calcTemp <- function(){
+  for(year in 2013:2015){    #2013년부터 2015년     
+    for(month in 1:12){       #1월부터 9월
+      if(year == 2015 && month == 9){ #2015년은 8월까지 데이터가 존재하므로 반복문 멈춤
+        break;
+      }
+      regex <- paste(as.character(year),'-',sep='')     #정규식 만들기
+      if(month < 10){
+        regex <- paste(regex, as.character(month), sep='0')
+      }
+      else{
+        regex <- paste(regex, as.character(month), sep='')
+      }
+      temperature.mean <- mean(w.s.a.s.data$기온[grep(regex, w.s.a.s.data$날짜)])   #월의 평균 기온
+      season <- w.s.a.s.data$계절[grep(regex, w.s.a.s.data$날짜)[1]]    #어느 계절인지 저장
+      if(season == '겨울' || season == '가을'){#겨울, 봄은 평균온도 - 현재온도
+        relativeTemp <<- c(relativeTemp, w.s.a.s.data$기온[grep(regex, w.s.a.s.data$날짜)]-temperature.mean)
+      }
+      else{   #여름, 가을은 현재온도 - 평균온도
+        relativeTemp <<- c(relativeTemp, temperature.mean- w.s.a.s.data$기온[grep(regex, w.s.a.s.data$날짜)])
+      }
+    }
+  }
+}
+calcTemp()
+relativeTemp #계절에 따른 월별 상대적인 온도
+relativeTemp.data.frame <- w.s.a.s.data  #데이터 복사
+relativeTemp.data.frame$상대온도 <- relativeTemp #상대온대 Column 추가
+View(relativeTemp.data.frame)
+
+cor(relativeTemp.data.frame[,c(3:13,15)] , use = "pairwise.complete.obs")
+
+
+#----- 상대온도를 정규화
+normalization <- function(x){
+  temp <- (x - mean(x, na.rm= TRUE))/sd(x, na.rm = TRUE)
+  return(temp)
+}
+relativeTemp.normal <- c()
+
+calcTemp.normal <- function(){
+  for(year in 2013:2015){    #2013년부터 2015년     
+    for(month in 1:12){       #1월부터 9월
+      if(year == 2015 && month == 9){ #2015년은 8월까지 데이터가 존재하므로 반복문 멈춤
+        break;
+      }
+      regex <- paste(as.character(year),'-',sep='')     #정규식 만들기
+      if(month < 10){
+        regex <- paste(regex, as.character(month), sep='0')
+      }
+      else{
+        regex <- paste(regex, as.character(month), sep='')
+      }
+      print(regex)
+      temperature.mean <- mean(w.s.a.s.data$기온[grep(regex, w.s.a.s.data$날짜)])   #월의 평균 기온
+      season <- w.s.a.s.data$계절[grep(regex, w.s.a.s.data$날짜)[1]]    #어느 계절인지 저장
+      if(season == '겨울' || season == '가을'){#겨울, 봄은 평균온도 - 현재온도
+        relativeTemp.normal <<- c(relativeTemp.normal, normalization(w.s.a.s.data$기온[grep(regex, w.s.a.s.data$날짜)]-temperature.mean))
+      }
+      else{   #여름, 가을은 현재온도 - 평균온도
+        relativeTemp.normal <<- c(relativeTemp.normal, normalization(temperature.mean- w.s.a.s.data$기온[grep(regex, w.s.a.s.data$날짜)]))
+      }
+    }
+  }
+}
+calcTemp.normal()
+relativeTemp.normal.data.frame <-relativeTemp.data.frame 
+relativeTemp.normal.data.frame$상대온도.정규화 <- relativeTemp.normal
+View(relativeTemp.normal.data.frame)
+cor(relativeTemp.normal.data.frame[,c(3:13,15, 16)] , use = "pairwise.complete.obs")
 
 
 
+
+#매출 월별 정규화
+sales.normal <- c()
+calcSales.normal <- function(){
+  for(year in 2013:2015){    #2013년부터 2015년     
+    for(month in 1:12){       #1월부터 9월
+      if(year == 2015 && month == 9){ #2015년은 8월까지 데이터가 존재하므로 반복문 멈춤
+        break;
+      }
+      regex <- paste(as.character(year),'-',sep='')     #정규식 만들기
+      if(month < 10){
+        regex <- paste(regex, as.character(month), sep='0')
+      }
+      else{
+        regex <- paste(regex, as.character(month), sep='')
+      }
+      sales.mean <- mean(w.s.a.s.data$매출[grep(regex, w.s.a.s.data$날짜)], na.rm = TRUE)   #월의 평균 매출
+      sales.normal <<- c(sales.normal, normalization(w.s.a.s.data$매출[grep(regex, w.s.a.s.data$날짜)]-sales.mean))#월별 평균 매출 - 현재 매출 -> 정규화
+    }
+  }
+}
+calcSales.normal()
+sales.normal
+dst.data.frame <- relativeTemp.normal.data.frame
+dst.data.frame$상대매출.정규화 <- sales.normal   #최종 dataframe 도출
+View(dst.data.frame)
+cor(dst.data.frame[,c(3:13,15, 16, 17)] , use = "pairwise.complete.obs")
+plot(dst.data.frame$상대온도.정규화, dst.data.frame$상대매출.정규화)
+
+
+#매출 군집화
+#정규화한 매출에서 -0.5 이하는 못팔린거, 0.5이상이면 잘 팔린거
+sales.grade <- c()
+sales.grade[dst.data.frame$상대매출.정규화 > 0.9] <- '대박'
+sales.grade[dst.data.frame$상대매출.정규화 < -0.9] <- '쪽박'
+sales.grade <- ifelse(is.na(sales.grade), '중박', sales.grade) 
+sales.grade <- ifelse(is.na(dst.data.frame$상대매출.정규화), NA, sales.grade)
+dst.data.frame$장사 <- as.factor(sales.grade)
+
+View(dst.data.frame)
+str(dst.data.frame)
+#------------회기 분석
+library(mlbench)
+View(dst.data.frame)
+obj.view <- subset(dst.data.frame, select = c(습도, 강수량, 일사량, 일조량, 기온, 풍속, 전운량, 경제기사수, 사회기사수, 총기사수, 상대온도, 상대온도.정규화, 상대매출.정규화))
+obj.view <- subset(dst.data.frame, select = c(습도, 강수량, 일사량, 일조량, 풍속, 전운량, 경제기사수, 사회기사수, 총기사수, 상대온도.정규화, 상대매출.정규화))
+
+m <- lm(상대매출.정규화 ~., data = obj.view)
+m2 <- step(m, direction = "both")
+summary(m2)     #적당한 독립변수가 정해졌음 -> 강수량, 일사량, 기온, 풍속, 전운량, 사회기사수, 상대온도.정규화
+m <- lm(상대매출.정규화 ~강수량 + 일사량 + 풍속 + 상대온도.정규화, data = obj.view)
+summary(m)
+#----------분류 모델
+#---------의사결정나무
+library(party)
+library(e1071)
+library(nnet)
+obj.view <- subset(dst.data.frame, select = c(강수량, 일사량, 풍속, 상대온도.정규화, 장사))
+obj.view <- obj.view[complete.cases(obj.view),]
+
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
+data.train <- obj.view[index==1,]
+data.test <- obj.view[index==2,]
+tree <- ctree(장사~., data = data.train)
+pred <- predict(tree, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+
+nb <- naiveBayes(장사 ~ ., data = data.train)
+pred <- predict(nb, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+nn <- nnet(장사 ~ ., data = data.train, size = 3)
+pred <- predict(nn, newdata = data.test, type = "class")
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+obj.view <- subset(dst.data.frame, select = c(강수량, 일사량, 기온, 풍속, 전운량, 사회기사수, 상대온도.정규화, 상대매출.정규화))
+obj.view <- obj.view[complete.cases(obj.view),]
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
+data.train <- obj.view[index==1,]
+data.test <- obj.view[index==2,]
+mm <- lm(상대매출.정규화 ~ ., data = data.train)
+pred <- predict(mm, newdata = data.test)
+pred
+
+
+#------계절 별로 나눠서 분석-----
+#겨울
+obj.view <- subset(dst.data.frame, 계절 == '겨울', select = c(습도, 강수량, 일사량, 일조량, 풍속, 전운량, 경제기사수, 사회기사수, 총기사수, 상대온도.정규화, 상대매출.정규화))
+m <- lm(상대매출.정규화 ~., data = obj.view)
+mm <- step(m, direction = "both")
+summary(mm)
+View(obj.view)
+
+
+obj.view <- subset(dst.data.frame, 계절 == '겨울', select = c(강수량, 사회기사수, 상대온도.정규화, 일사량, 장사))
+obj.view <- obj.view[complete.cases(obj.view),]
+
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
+data.train <- obj.view[index==1,]
+data.test <- obj.view[index==2,]
+tree <- ctree(장사~., data = data.train)
+pred <- predict(tree, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+
+nb <- naiveBayes(장사 ~ ., data = data.train)
+pred <- predict(nb, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+nn <- nnet(장사 ~ ., data = data.train, size = 3)
+pred <- predict(nn, newdata = data.test, type = "class")
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+#봄
+obj.view <- subset(dst.data.frame, 계절 == '봄', select = c(습도, 강수량, 일사량, 일조량, 풍속, 전운량, 경제기사수, 사회기사수, 총기사수, 상대온도.정규화, 상대매출.정규화))
+m <- lm(상대매출.정규화 ~., data = obj.view)
+mm <- step(m, direction = "both")
+summary(mm)
+View(obj.view)
+
+
+obj.view <- subset(dst.data.frame, 계절 == '겨울', select = c(강수량, 일조량, 경제기사수, 사회기사수, 상대온도.정규화, 장사))
+obj.view <- obj.view[complete.cases(obj.view),]
+
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
+data.train <- obj.view[index==1,]
+data.test <- obj.view[index==2,]
+tree <- ctree(장사~., data = data.train)
+pred <- predict(tree, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+
+nb <- naiveBayes(장사 ~ ., data = data.train)
+pred <- predict(nb, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+nn <- nnet(장사 ~ ., data = data.train, size = 3)
+pred <- predict(nn, newdata = data.test, type = "class")
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
