@@ -22,7 +22,7 @@ public class MyDataBase{
 	private String searchNotAvailableWordQuery = "select count(*) from na_table where origin_word=?";
 	public MyDataBase() throws ClassNotFoundException, SQLException{
 		connection = new MyConnection().getConnection();
-		this.articlePreparedStatement = this.connection.prepareStatement("select * from article_table where article_date like '%2014%'");
+		this.articlePreparedStatement = this.connection.prepareStatement("select * from article_table where article_date like '2015-08-2%' or article_date like '2015-08-3%';");
 		this.articleResultSet = this.articlePreparedStatement.executeQuery();
 		
 	}
