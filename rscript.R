@@ -413,17 +413,62 @@ calcSentiArticle <- function(){
         tmp <- article_sentiment_count[grep(regex, article_sentiment_count$날짜),] #날짜별로 모음
         if(nrow(tmp) == 0){
           print(regex)
-          break
         }
         else{
           posi.article.count <<- c(posi.article.count, nrow(tmp[tmp$긍정어휘개수 > tmp$부정어휘개수,]))
+          nega.article.count <<- c(nega.article.count, nrow(tmp[tmp$긍정어휘개수 <= tmp$부정어휘개수,]))
         }
       }
     }
   }
 }
 calcSentiArticle()
-temp$긍정기사개수 <- posi.article.count
-수
+posi.article.count <- c(0, posi.article.count)
+nega.article.count <- c(0, nega.article.count)
 
-#----긍정, 부정 어휘 비ㅇ
+dst.data.frame$긍정기사개수 <- posi.article.count
+dst.data.frame$부정기사개수 <- nega.article.count
+View(dst.data.frame)
+#----긍정, 부정 어휘 비율
+sentiword.rate <- read.csv("sentiword_rate.csv")
+View(sentiword.rate)
+
+dst.data.frame$긍정어휘비율 <- sentiword.rate$긍정비율
+dst.data.frame$부정어휘비율 <- sentiword.rate$부정비율
+View(dst.data.frame)
+
+
+#------------ 분석 -------
+obj.view <- subset(dst.data.frame, select = c(요일, 습도, 강수량, 일사량, 일조량, 기온, 풍속, 전운량, 매출, 경제기사수, 사회기사수, 총기사수, 계절, 상대온도.정규화, 섬유, 코스피, 공휴일, 연휴, 긍정기사개수, 부정기사개수, 긍정어휘비율, 부정어휘비율))
+View(obj.view)
+str(obj.view)
+m <- lm(매출 ~., data = obj.view,  use = "pairwise.complete.obs")
+m2 <- step(m , direction = "both")
+summary(m2)
+
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.9, 0.1))
+data.train <- obj.view[index==1,]
+data.test <- obj.view[index==2,]
+drops <- c("매출")
+data.test.temp <- data.test[,!(names(data.test) %in% drops)]
+View(data.test)
+
+View(data.test)
+result <- predict(m2, newdata = data.test.temp)
+data.test$예상매출 <- result
+temp <- subset(data.test, select = c(매출, 예상매출))
+
+View(temp)
+
+#-------------plotting----------
+
+write.csv(temp, 'dst.csv')
+
+
+
+
+
+
+
+
+
