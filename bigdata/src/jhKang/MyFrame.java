@@ -67,7 +67,6 @@ public class MyFrame extends JFrame{
 						apiKey = apiKey.replaceAll(":.*", "");
 
 						ExecutorService exec = Executors.newCachedThreadPool();
-						exec.execute(new MyGarbageCollector(apiKey));
 						exec.execute(new MyExecutor(db,exitCondition, key, apiKey));
 						exec.execute(new MyExecutor(db,exitCondition, key, apiKey));
 						exec.execute(new MyExecutor(db,exitCondition, key, apiKey));

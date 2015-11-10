@@ -169,14 +169,15 @@ plot(dst.data.frame$상대온도.정규화, dst.data.frame$상대매출.정규화)
 #매출 군집화
 #정규화한 매출에서 -0.5 이하는 못팔린거, 0.5이상이면 잘 팔린거
 sales.grade <- c()
-sales.grade[dst.data.frame$상대매출.정규화 > 0.9] <- '대박'
-sales.grade[dst.data.frame$상대매출.정규화 < -0.9] <- '쪽박'
+sales.grade[dst.data.frame$상대매출.정규화 > 0.5] <- '대박'
+sales.grade[dst.data.frame$상대매출.정규화 < -0.5] <- '쪽박'
 sales.grade <- ifelse(is.na(sales.grade), '중박', sales.grade) 
 sales.grade <- ifelse(is.na(dst.data.frame$상대매출.정규화), NA, sales.grade)
 dst.data.frame$장사 <- as.factor(sales.grade)
 
 View(dst.data.frame)
 str(dst.data.frame)
+write.csv(dst.data.frame, 'dst.csv')
 #------------회기 분석
 library(mlbench)
 View(dst.data.frame)
@@ -270,7 +271,7 @@ summary(mm)
 View(obj.view)
 
 
-obj.view <- subset(dst.data.frame, 계절 == '겨울', select = c(강수량, 일조량, 경제기사수, 사회기사수, 상대온도.정규화, 장사))
+obj.view <- subset(dst.data.frame, 계절 == '봄', select = c(강수량, 일조량, 경제기사수, 사회기사수, 상대온도.정규화, 장사))
 obj.view <- obj.view[complete.cases(obj.view),]
 
 index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
@@ -294,3 +295,135 @@ pred <- predict(nn, newdata = data.test, type = "class")
 conf.mat <- table(pred, data.test$장사)
 conf.mat
 (accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+#여름
+obj.view <- subset(dst.data.frame, 계절 == '여름', select = c(습도, 강수량, 일사량, 일조량, 풍속, 전운량, 경제기사수, 사회기사수, 총기사수, 상대온도.정규화, 상대매출.정규화))
+m <- lm(상대매출.정규화 ~., data = obj.view)
+mm <- step(m, direction = "both")
+summary(mm)
+View(obj.view)
+
+
+obj.view <- subset(dst.data.frame, 계절 == '여름', select = c(강수량, 일사량, 일조량, 전운량, 사회기사수, 상대온도.정규화, 장사))
+obj.view <- obj.view[complete.cases(obj.view),]
+
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
+data.train <- obj.view[index==1,]
+data.test <- obj.view[index==2,]
+tree <- ctree(장사~., data = data.train)
+pred <- predict(tree, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+
+nb <- naiveBayes(장사 ~ ., data = data.train)
+pred <- predict(nb, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+nn <- nnet(장사 ~ ., data = data.train, size = 3)
+pred <- predict(nn, newdata = data.test, type = "class")
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+#가을
+obj.view <- subset(dst.data.frame, 계절 == '가을', select = c(습도, 강수량, 일사량, 일조량, 풍속, 전운량, 경제기사수, 사회기사수, 총기사수, 상대온도.정규화, 상대매출.정규화))
+m <- lm(상대매출.정규화 ~., data = obj.view)
+mm <- step(m, direction = "both")
+summary(mm)
+View(obj.view)
+
+
+obj.view <- subset(dst.data.frame, 계절 == '가을', select = c(전운량, 사회기사수, 상대온도.정규화, 장사))
+obj.view <- obj.view[complete.cases(obj.view),]
+
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
+data.train <- obj.view[index==1,]
+data.test <- obj.view[index==2,]
+tree <- ctree(장사~., data = data.train)
+pred <- predict(tree, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+
+nb <- naiveBayes(장사 ~ ., data = data.train)
+pred <- predict(nb, data.test)
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+nn <- nnet(장사 ~ ., data = data.train, size = 3)
+pred <- predict(nn, newdata = data.test, type = "class")
+conf.mat <- table(pred, data.test$장사)
+conf.mat
+(accuracy <- sum(diag(conf.mat))/sum(conf.mat) * 100)
+
+#-----주가 지수 추가
+clothes.data <- read.csv("clothes.csv")   #섬유 주가 읽기
+dst.data.frame$섬유 <- clothes.data$시가지수  #column 추가
+View(dst.data.frame)
+
+kospi.data <- read.csv("kospi.csv")  #시가지수가 factor로 저장되어 있음.
+kospi.data$시가지수 <- as.character(kospi.data$시가지수)
+kospi.data$시가지수 <- as.numeric(gsub(",", "", kospi.data$시가지수))
+dst.data.frame$코스피 <- as.numeric(kospi.data$시가지수)
+
+#----- 공휴일 추가
+holiday.data <- read.csv("holiday.csv")
+str(holiday.data)
+
+dst.data.frame$공휴일 <- holiday.data$공휴일
+dst.data.frame$연휴 <- holiday.data$bh_bigtosmall
+
+View(dst.data.frame)
+
+
+#---------- 기사 감성판단 데이터 추가-----
+#---- 긍정, 부정 기사 개수
+article_sentiment_count <- read.csv("article_sentiment.csv")
+colnames(article_sentiment_count) <- c('날짜', '분류', '긍정어휘개수', '부정어휘개수', '중립어휘개수')
+View(article_sentiment_count)
+posi.article.count <- c()
+nega.article.count <- c()
+calcSentiArticle <- function(){
+  for(year in 2013:2015){
+    for(month in 1:12){
+      for(day in 1:31){
+        if(year == 2015 && month > 8){
+          break
+        }
+        regex <- paste(as.character(year),'-',sep='')
+        if(month < 10){
+          regex <- paste(regex,as.character(month),sep = '0')
+        }
+        else{
+          regex <- paste(regex,as.character(month),sep = '')
+        }
+        regex <- paste(regex, '-', sep='')
+        if(day < 10){
+          regex <- paste(regex, as.character(day), sep = '0')
+        }
+        else{
+          regex <- paste(regex, as.character(day), sep = '')
+        }
+        tmp <- article_sentiment_count[grep(regex, article_sentiment_count$날짜),] #날짜별로 모음
+        if(nrow(tmp) == 0){
+          print(regex)
+          break
+        }
+        else{
+          posi.article.count <<- c(posi.article.count, nrow(tmp[tmp$긍정어휘개수 > tmp$부정어휘개수,]))
+        }
+      }
+    }
+  }
+}
+calcSentiArticle()
+temp$긍정기사개수 <- posi.article.count
+수
+
+#----긍정, 부정 어휘 비ㅇ
