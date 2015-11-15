@@ -437,38 +437,129 @@ dst.data.frame$긍정어휘비율 <- sentiword.rate$긍정비율
 dst.data.frame$부정어휘비율 <- sentiword.rate$부정비율
 View(dst.data.frame)
 
+#------코스닥 빠진 날 넣기
+kosdaq.data <- read.csv('kosdaq.csv')
+View(kosdaq.data)
+dst.kosdaq.data <- c()
+setKOSDAQ <- function(){
+  for(date in 1:nrow(dst.data.frame)){
+    index <- grep(dst.data.frame$날짜[date], kosdaq.data$일자)
+    tmp <- kosdaq.data[index,]
+    if(nrow(tmp) == 0){
+      dst.kosdaq.data <<- c(dst.kosdaq.data, dst.kosdaq.data[date-1])
+    }
+    else{
+      dst.kosdaq.data <<- c(dst.kosdaq.data, kosdaq.data$시가지수[index])
+    }
+  }
+}
+setKOSDAQ()
+dst.kosdaq.data
+dst.data.frame$코스닥 <- dst.kosdaq.data
+#-------날짜 데이터
+day2 <- c();
+abstractDay <- c();
+setDay <- function(){
+  for(year in 2013:2015){
+    for(month in 1:12){
+      for(day in 1:31){
+        if(year == 2015 && month > 8){
+          break
+        }
+        regex <- paste(as.character(year),'-',sep='')
+        if(month < 10){
+          regex <- paste(regex,as.character(month),sep = '0')
+        }
+        else{
+          regex <- paste(regex,as.character(month),sep = '')
+        }
+        regex <- paste(regex, '-', sep='')
+        if(day < 10){
+          regex <- paste(regex, as.character(day), sep = '0')
+        }
+        else{
+          regex <- paste(regex, as.character(day), sep = '')
+        }
+        if(nrow(dst.data.frame[grep(regex, dst.data.frame$날짜),]) == 0){
+          print(regex)
+        }
+        else{
+          day2 <<- c(day2, day)
+          if(day <= 10){
+            abstractDay <<- c(abstractDay, '초순')
+          }
+          else if(day <= 20){
+            abstractDay <<- c(abstractDay, '중순')
+          }
+          else{
+            abstractDay <<- c(abstractDay, '하순')
+          }
+        }
+      }
+    }
+  }
+}
 
-#------------ 분석 -------
-obj.view <- subset(dst.data.frame, select = c(요일, 습도, 강수량, 일사량, 일조량, 기온, 풍속, 전운량, 매출, 경제기사수, 사회기사수, 총기사수, 계절, 상대온도.정규화, 섬유, 코스피, 공휴일, 연휴, 긍정기사개수, 부정기사개수, 긍정어휘비율, 부정어휘비율))
+setDay()
+day2 
+abstractDay
+dst.data.frame$일 <- day2
+dst.data.frame$월중 <- as.factor(abstractDay)
+View(dst.data.frame)
+str(dst.data.frame)
+#------------ 모델 생성 -------
+select.column <- c("요일", "습도", "강수량", "일사량", "일조량", "풍속", "전운량", "매출", "경제기사수", "사회기사수", "총기사수", "계절", "상대온도.정규화", "섬유","코스닥", "공휴일", "연휴", "긍정기사개수", "부정기사개수", "긍정어휘비율", "부정어휘비율", "일", "월중")
+obj.view <- subset(dst.data.frame, select = select.column)
 View(obj.view)
 str(obj.view)
 m <- lm(매출 ~., data = obj.view,  use = "pairwise.complete.obs")
 m2 <- step(m , direction = "both")
 summary(m2)
 
-index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.9, 0.1))
-data.train <- obj.view[index==1,]
-data.test <- obj.view[index==2,]
-drops <- c("매출")
-data.test.temp <- data.test[,!(names(data.test) %in% drops)]
-View(data.test)
-
-View(data.test)
-result <- predict(m2, newdata = data.test.temp)
-data.test$예상매출 <- result
-temp <- subset(data.test, select = c(매출, 예상매출))
-
-View(temp)
-
+#-- 분석작업
+while(TRUE){
+  obj.view <- subset(dst.data.frame, select = select.column)
+  cc <- complete.cases(obj.view)  #NA가 없는 인덱스 벡터형으로 저장
+  obj.view <- obj.view[cc, ] #NA가 없는 행 삭제
+  index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.9, 0.1))
+  data.test <- obj.view[index==2,]
+  drops <- c("매출")
+  data.test.temp <- data.test[,!(names(data.test) %in% drops)]
+  result <- predict(m2, newdata = data.test.temp)
+  data.test$예상매출 <- result
+  temp <- subset(data.test, select = c(매출, 예상매출))
+  hit_rate <- (nrow(temp[abs(temp$매출 - temp$예상매출)<= 500000,])/nrow(temp))*100
+  print(hit_rate)
+  if(hit_rate>=65){
+    break
+  }
+}
 #-------------plotting----------
+#선 그래프
+View(temp)
+nrow(temp)
+write.csv(dst.data.frame, 'dst_data_frame.csv')
+write.csv(temp, 'predict.csv')
+temp <- read.csv('predict.csv')
+temp$id <- seq(1, nrow(temp), 1)
 
-write.csv(temp, 'dst.csv')
+plot(x = temp$id, y = temp$매출, ylab = "매출액", xlab ="샘플",type="o", cex = 1, col = "#FF0000")    #매출액 출력
+legend("topright", legend=c("매출"), pch = c(20), col = c("red"))
+
+plot(x = temp$id, y = temp$예상매출, ylab = "매출액", xlab ="샘플",type="o", cex = 1, col = "#0000FF")    #매출액 출력
+legend("topright", legend=c("예상매출"), pch = c(20), col = c("blue"))
+
+points(x = temp$id, y = temp$예상매출, type = "o", cex = 1, col = "#0000FF")  #
+legend("topright", legend=c("매출", "예상매출"), pch = c(20, 20), col = c("red", "blue"))
 
 
+#box plot
+box.data <- data.frame(매출 = c(temp$매출, temp$예상매출))
+box.data$예상[1:nrow(temp)] <- '진짜'
+box.data$예상[(nrow(temp)+1):nrow(box.data)] <- '예상'
+box.data$예상 <- as.factor(box.data$예상)
+boxstats <- boxplot(매출 ~ 예상, data = box.data, ylab = "매출액", notch = TRUE)
+boxstats
 
-
-
-
-
-
-
+#-------보여주기용
+View(subset(dst.data.frame, select = c(날짜, 코스피, 코스닥, 섬유)))
