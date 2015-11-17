@@ -507,8 +507,15 @@ dst.data.frame$일 <- day2
 dst.data.frame$월중 <- as.factor(abstractDay)
 View(dst.data.frame)
 str(dst.data.frame)
+#--------- 전날 일기 예보 ----
+#강수량 하루씩 땡기기
+prev.precipitation <- dst.data.frame$강수량
+prev.precipitation <- c(prev.precipitation , 0)
+prev.precipitation <- prev.precipitation[-1]
+
+dst.data.frame$일기예보 <- prev.precipitation
 #------------ 모델 생성 -------
-select.column <- c("요일", "습도", "강수량", "일사량", "일조량", "풍속", "전운량", "매출", "경제기사수", "사회기사수", "총기사수", "계절", "상대온도.정규화", "섬유","코스닥", "공휴일", "연휴", "긍정기사개수", "부정기사개수", "긍정어휘비율", "부정어휘비율", "일", "월중")
+select.column <- c("요일", "습도", "강수량", "일사량", "일조량", "풍속", "전운량", "매출", "경제기사수", "사회기사수", "총기사수", "계절", "상대온도.정규화", "섬유","코스닥", "공휴일", "연휴", "긍정기사개수", "부정기사개수", "긍정어휘비율", "부정어휘비율", "일", "월중", "일기예보")
 obj.view <- subset(dst.data.frame, select = select.column)
 View(obj.view)
 str(obj.view)
