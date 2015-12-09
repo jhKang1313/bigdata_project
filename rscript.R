@@ -21,11 +21,11 @@ View(weather.sales.data)
 
 
 #-------기사 개수 -----------
-article.data <- read.csv("article_data.csv") #article_data.csv 파일 읽기  -> 기사 내용으로 인해 파일 크기가 커서 파일을 제대로 못 읽어옴 -> 내용은 중요하지 않기 때문에 날ㄹ
+article.data <- read.csv("article_data.csv") #article_data.csv 파일 읽기  -> 기사 내용으로 인해 파일 크기가 커서 파일을 제대로 못 읽어옴 -> 내용은 중요하지 않기 때문에 버림
 article.count <- table(article.data$날짜, article.data$분류)   #날짜에 따른 경제면, 사회면 기사 개수
 article.count <- as.data.frame.matrix(article.count)  #table -> dataframe 변환
 article.count <- data.frame(경제 = c(NA, article.count[,1]),사회 = c(NA, article.count[,2])) #2013년 1월 1일 신문 기사 수집이 안되기 때문에 그 날 기사 수를 NA로 설정
-
+article.count
 weather.sales.article.data <- weather.sales.data    #기사 수 추가된 dataframe 생성
 weather.sales.article.data$경제기사수 <- article.count$경제 #경제 기사 수 추가
 weather.sales.article.data$사회기사수 <- article.count$사회 #사회 기사 수 추가
@@ -231,11 +231,35 @@ pred
 
 #------계절 별로 나눠서 분석-----
 #겨울
-obj.view <- subset(dst.data.frame, 계절 == '겨울', select = c(습도, 강수량, 일사량, 일조량, 풍속, 전운량, 경제기사수, 사회기사수, 총기사수, 상대온도.정규화, 상대매출.정규화))
-m <- lm(상대매출.정규화 ~., data = obj.view)
+select.column <- c("요일", "습도", "강수량", "일사량", "일조량", "풍속", "전운량", "매출", "경제기사수", "사회기사수", "총기사수", "계절", "상대온도.정규화", "섬유","코스닥","이상치", "공휴일", "연휴", "긍정기사개수", "부정기사개수", "긍정어휘비율", "부정어휘비율", "일", "월중", "일기예보")
+obj.view <- subset(dst.data.frame, 계절 == '겨울', select = select.column)
+obj.view <- subset(obj.view, select = c("요일", "습도", "강수량", "일사량", "일조량", "풍속", "전운량", "매출", "경제기사수", "사회기사수", "총기사수", "상대온도.정규화", "섬유","코스닥","이상치", "공휴일", "연휴", "긍정기사개수", "부정기사개수", "긍정어휘비율", "부정어휘비율", "일", "월중", "일기예보"))
+View(obj.view)
+m <- lm(매출 ~., data = obj.view,  use = "pairwise.complete.obs")
 mm <- step(m, direction = "both")
 summary(mm)
 View(obj.view)
+
+data.test.temp <- data.test[,!(names(data.test) %in% drops)]
+
+  obj.view <- subset(dst.data.frame, 계절 == '겨울', select = select.column)
+  drops <- c("계절")
+  obj.view <- obj.view[, !(names(obj.view) %in% drops)]
+  cc <- complete.cases(obj.view)  #NA가 없는 인덱스 벡터형으로 저장
+  obj.view <- obj.view[cc, ] #NA가 없는 행 삭제
+  index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0, 1))
+  data.test <- obj.view[index==2,]
+  drops <- c("매출")
+  data.test.temp <- data.test[,!(names(data.test) %in% drops)]
+  result <- predict(mm, newdata = data.test.temp)
+  data.test$예상매출 <- result
+  temp <- subset(data.test, select = c(매출, 예상매출))
+  hit_rate <- (nrow(temp[abs(temp$매출 - temp$예상매출)<= 500000,])/nrow(temp))*100
+  print(hit_rate)
+  
+
+View(temp)
+
 
 
 obj.view <- subset(dst.data.frame, 계절 == '겨울', select = c(강수량, 사회기사수, 상대온도.정규화, 일사량, 장사))
@@ -514,11 +538,17 @@ prev.precipitation <- c(prev.precipitation , 0)
 prev.precipitation <- prev.precipitation[-1]
 
 dst.data.frame$일기예보 <- prev.precipitation
+
+#--------이상한 날
+abnormalDate <- read.csv('abnormal_date.csv')
+
+dst.data.frame$이상치 <- abnormalDate$이상치기념일
+
+View(dst.data.frame)
+
 #------------ 모델 생성 -------
-select.column <- c("요일", "습도", "강수량", "일사량", "일조량", "풍속", "전운량", "매출", "경제기사수", "사회기사수", "총기사수", "계절", "상대온도.정규화", "섬유","코스닥", "공휴일", "연휴", "긍정기사개수", "부정기사개수", "긍정어휘비율", "부정어휘비율", "일", "월중", "일기예보")
+select.column <- c("요일", "습도", "강수량", "일사량","이상치", "일조량", "풍속", "전운량", "매출", "경제기사수", "사회기사수", "총기사수", "계절", "상대온도.정규화", "섬유","코스닥", "공휴일", "연휴", "긍정기사개수", "부정기사개수", "긍정어휘비율", "부정어휘비율", "일", "월중", "일기예보")
 obj.view <- subset(dst.data.frame, select = select.column)
-View(obj.view)
-str(obj.view)
 m <- lm(매출 ~., data = obj.view,  use = "pairwise.complete.obs")
 m2 <- step(m , direction = "both")
 summary(m2)
@@ -535,12 +565,25 @@ while(TRUE){
   result <- predict(m2, newdata = data.test.temp)
   data.test$예상매출 <- result
   temp <- subset(data.test, select = c(매출, 예상매출))
-  hit_rate <- (nrow(temp[abs(temp$매출 - temp$예상매출)<= 500000,])/nrow(temp))*100
+  hit_rate <- (nrow(temp[abs(temp$매출 - temp$예상매출)<= 600000,])/nrow(temp))*100
   print(hit_rate)
-  if(hit_rate>=65){
+  if(hit_rate>=70){
     break
   }
 }
+#-------- 전체 예상
+obj.view <- subset(dst.data.frame, select = select.column)
+cc <- complete.cases(obj.view)  #NA가 없는 인덱스 벡터형으로 저장
+obj.view <- obj.view[cc, ] #NA가 없는 행 삭제
+index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0, 1))
+data.test <- obj.view[index==2,]
+drops <- c("매출")
+data.test.temp <- data.test[,!(names(data.test) %in% drops)]
+result <- predict(m2, newdata = data.test.temp)
+data.test$예상매출 <- result
+temp <- subset(data.test, select = c(매출, 예상매출))
+
+
 #-------------plotting----------
 #선 그래프
 View(temp)
@@ -568,5 +611,14 @@ box.data$예상 <- as.factor(box.data$예상)
 boxstats <- boxplot(매출 ~ 예상, data = box.data, ylab = "매출액", notch = TRUE)
 boxstats
 
+
+#bar plot
+barplot
+
 #-------보여주기용
 View(subset(dst.data.frame, select = c(날짜, 코스피, 코스닥, 섬유)))
+View(subset(dst.data.frame, select = c(날짜, 기온, 계절, 상대온도, 상대온도.정규화)))
+
+View(subset(dst.data.frame, select = c(날짜, 매출, 상대매출.정규화, 장사)))
+View(subset(dst.data.frame, select = c(날짜, 연휴, 공휴일, 이상치)))
+View(dst.data.frame)
