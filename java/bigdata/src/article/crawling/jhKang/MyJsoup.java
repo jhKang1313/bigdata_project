@@ -62,6 +62,7 @@ public class MyJsoup{
 	public void setURL(int i) throws Exception{
 		url = "http://www.imaeil.com/sub_news/sub_news_view.php?news_id="+i+"&yy=2014";
 		doc = Jsoup.connect(url).get();
+		
 	}
 	public void setArticleCategory2(){
 		String temp = null;
