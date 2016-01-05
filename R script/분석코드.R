@@ -7,17 +7,17 @@ dst.data.frame <- read.csv("dst_data_frame.csv")
 library(party)
 library(e1071)
 library(nnet)
-select.column <- c('요일', '습도', '강수량', '일사량', '일조량', '기온', '풍속', '전운량', '경제기사수',
-                   '사회기사수', '총기사수', '계절', '상대온도', '상대온도.정규화', '장사', '섬유', '코스피',
-                   '코스닥', '공휴일', '연휴', '긍정기사개수', '부정기사개수', '긍정어휘비율', '부정어휘비율',
-                   '일', '월중', '일기예보')
+select.column <- c('요일', '습도', '강수량', '일사량', '일조량', '기온', '풍속', '전운량', 
+                   '경제기사수','사회기사수', '총기사수', '계절', '상대온도', '상대온도.정규화',
+                   '장사', '섬유', '코스피','코스닥', '공휴일', '연휴', '긍정기사개수',
+                   '부정기사개수', '긍정어휘비율', '부정어휘비율','일', '월중', '일기예보')
 
 obj.view <- subset(dst.data.frame, select = select.column)
 obj.view <- obj.view[complete.cases(obj.view),]
 
 index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0.7, 0.3))
-data.train <- obj.view[index==1,]
-data.test <- obj.view[index==2,]
+data.train <- obj.view#[index==1,]
+data.test <- obj.view#[index==2,]
 
 #의사결정나무
 tree <- ctree(장사~., data = data.train)
@@ -183,15 +183,14 @@ summary(m2)
 obj.view <- subset(dst.data.frame, select = select.column)
 #cc <- complete.cases(obj.view)  #NA가 없는 인덱스 벡터형으로 저장
 #obj.view <- obj.view[cc, ] #NA가 없는 행 삭제
-index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0, 1))
-data.test <- obj.view[index==2,]
+#index <- sample(2, nrow(obj.view), replace = TRUE, prob = c(0, 1))
+data.test <- obj.view#[index==2,]
 drops <- c("매출")
 data.test.temp <- data.test[,!(names(data.test) %in% drops)]
 result <- predict(m2, newdata = data.test.temp)
 data.test$예상매출 <- result
 predict <- subset(data.test, select = c(매출, 예상매출))
 predict$날짜 <- dst.data.frame$날짜
-
 
 #--------- 분석 결과 출력
 View(predict)
