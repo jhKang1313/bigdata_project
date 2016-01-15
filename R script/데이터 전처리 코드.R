@@ -1,83 +1,83 @@
-setwd("C:/Users/Jinhyuk/Documents")   #working directory ì„¤ì •
+setwd("C:/Users/Jinhyuk/Documents")   #working directory ¼³Á¤
 
-#-------ë‚ ì”¨ ë°ì´í„° ì½ê¸°
-weather.data <- read.csv("weather_data.csv")  #weather_data.csv íŒŒì¼ ì½ê¸°
+#-------³¯¾¾ µ¥ÀÌÅÍ ÀĞ±â
+weather.data <- read.csv("weather_data.csv")  #weather_data.csv ÆÄÀÏ ÀĞ±â
 View(weather.data)
 str(weather.data)
 
-#-------ë§¤ì¶œ ë°ì´í„° ì½ê¸°
-sales.data <- read.csv("sales_data.csv", na.strings=c("")) #sales_data.csv íŒŒì¼ ì½ê¸°, ë§¤ì¶œ ê¸°ë¡ì´ ì—†ëŠ” ê²ƒì€ NAë¡œ ì²˜ë¦¬
-sales.data$ë§¤ì¶œ = as.character(sales.data$ë§¤ì¶œ) #ë§¤ì¶œì´ factorë¡œ ì €ì¥ë˜ì–´ ìˆê¸° ë•Œë¬¸ì— ë¬¸ìì—´ë¡œ ë³€ê²½
-sales.data$ë§¤ì¶œ = as.integer(gsub(",", "", sales.data$ë§¤ì¶œ)) #ë§¤ì¶œì— ',' ë¬¸ìë¥¼ ê³µë°±ìœ¼ë¡œ ë³€ê²½í•œ í›„, ì •ìˆ˜í˜•ìœ¼ë¡œ Type ë³€ê²½
+#-------¸ÅÃâ µ¥ÀÌÅÍ ÀĞ±â
+sales.data <- read.csv("sales_data.csv", na.strings=c("")) #sales_data.csv ÆÄÀÏ ÀĞ±â, ¸ÅÃâ ±â·ÏÀÌ ¾ø´Â °ÍÀº NA·Î Ã³¸®
+sales.data$¸ÅÃâ = as.character(sales.data$¸ÅÃâ) #¸ÅÃâÀÌ factor·Î ÀúÀåµÇ¾î ÀÖ±â ¶§¹®¿¡ ¹®ÀÚ¿­·Î º¯°æ
+sales.data$¸ÅÃâ = as.integer(gsub(",", "", sales.data$¸ÅÃâ)) #¸ÅÃâ¿¡ ',' ¹®ÀÚ¸¦ °ø¹éÀ¸·Î º¯°æÇÑ ÈÄ, Á¤¼öÇüÀ¸·Î Type º¯°æ
 View(sales.data)        
 str(sales.data)
 
-#-------ë‚ ì”¨ ë§¤ì¶œ ë°ì´í„° ë³‘í•©
+#-------³¯¾¾ ¸ÅÃâ µ¥ÀÌÅÍ º´ÇÕ
 weather.sales.data <- weather.data
-weather.sales.data$ë§¤ì¶œ <- as.integer(sales.data$ë§¤ì¶œ) #weather.sales.data ë¡œ ë‚ ì”¨, ë§¤ì¶œ ë°ì´í„° ë³‘í•©
+weather.sales.data$¸ÅÃâ <- as.integer(sales.data$¸ÅÃâ) #weather.sales.data ·Î ³¯¾¾, ¸ÅÃâ µ¥ÀÌÅÍ º´ÇÕ
 str(weather.sales.data)
 View(weather.sales.data)
 
 
-#-------ê¸°ì‚¬ ê°œìˆ˜ -----------
-article.data <- read.csv("article_data.csv") #article_data.csv íŒŒì¼ ì½ê¸°  -> ê¸°ì‚¬ ë‚´ìš©ìœ¼ë¡œ ì¸í•´ íŒŒì¼ í¬ê¸°ê°€ ì»¤ì„œ íŒŒì¼ì„ ì œëŒ€ë¡œ ëª» ì½ì–´ì˜´ -> ê¸°ì‚¬ ê°œìˆ˜ì—ì„œ ë‚´ìš©ì€ ì¤‘ìš”í•˜ì§€ ì•Šê¸° ë•Œë¬¸ì— ë²„ë¦¼
-article.count <- table(article.data$ë‚ ì§œ, article.data$ë¶„ë¥˜)   #ë‚ ì§œì— ë”°ë¥¸ ê²½ì œë©´, ì‚¬íšŒë©´ ê¸°ì‚¬ ê°œìˆ˜
-article.count <- as.data.frame.matrix(article.count)  #table -> dataframe ë³€í™˜
-article.count <- data.frame(ê²½ì œ = c(NA, article.count[,1]),ì‚¬íšŒ = c(NA, article.count[,2])) #2013ë…„ 1ì›” 1ì¼ ì‹ ë¬¸ ê¸°ì‚¬ ìˆ˜ì§‘ì´ ì•ˆë˜ê¸° ë•Œë¬¸ì— ê·¸ ë‚  ê¸°ì‚¬ ìˆ˜ë¥¼ NAë¡œ ì„¤ì •
-weather.sales.article.data <- weather.sales.data    #ê¸°ì‚¬ ìˆ˜ ì¶”ê°€ëœ dataframe ìƒì„±
-weather.sales.article.data$ê²½ì œê¸°ì‚¬ìˆ˜ <- article.count$ê²½ì œ #ê²½ì œ ê¸°ì‚¬ ìˆ˜ ì¶”ê°€
-weather.sales.article.data$ì‚¬íšŒê¸°ì‚¬ìˆ˜ <- article.count$ì‚¬íšŒ #ì‚¬íšŒ ê¸°ì‚¬ ìˆ˜ ì¶”ê°€
-weather.sales.article.data$ì´ê¸°ì‚¬ìˆ˜ <- rowSums(article.count[,1:2], na.rm = TRUE) #ì´ ê¸°ì‚¬ ìˆ˜ ì¶”ê°€
+#-------±â»ç °³¼ö -----------
+article.data <- read.csv("article_data.csv") #article_data.csv ÆÄÀÏ ÀĞ±â  -> ±â»ç ³»¿ëÀ¸·Î ÀÎÇØ ÆÄÀÏ Å©±â°¡ Ä¿¼­ ÆÄÀÏÀ» Á¦´ë·Î ¸ø ÀĞ¾î¿È -> ±â»ç °³¼ö¿¡¼­ ³»¿ëÀº Áß¿äÇÏÁö ¾Ê±â ¶§¹®¿¡ ¹ö¸²
+article.count <- table(article.data$³¯Â¥, article.data$ºĞ·ù)   #³¯Â¥¿¡ µû¸¥ °æÁ¦¸é, »çÈ¸¸é ±â»ç °³¼ö
+article.count <- as.data.frame.matrix(article.count)  #table -> dataframe º¯È¯
+article.count <- data.frame(°æÁ¦ = c(NA, article.count[,1]),»çÈ¸ = c(NA, article.count[,2])) #2013³â 1¿ù 1ÀÏ ½Å¹® ±â»ç ¼öÁıÀÌ ¾ÈµÇ±â ¶§¹®¿¡ ±× ³¯ ±â»ç ¼ö¸¦ NA·Î ¼³Á¤
+weather.sales.article.data <- weather.sales.data    #±â»ç ¼ö Ãß°¡µÈ dataframe »ı¼º
+weather.sales.article.data$°æÁ¦±â»ç¼ö <- article.count$°æÁ¦ #°æÁ¦ ±â»ç ¼ö Ãß°¡
+weather.sales.article.data$»çÈ¸±â»ç¼ö <- article.count$»çÈ¸ #»çÈ¸ ±â»ç ¼ö Ãß°¡
+weather.sales.article.data$ÃÑ±â»ç¼ö <- rowSums(article.count[,1:2], na.rm = TRUE) #ÃÑ ±â»ç ¼ö Ãß°¡
 View(weather.sales.article.data)
 str(weather.sales.article.data)
 
-#------ê³„ì ˆ ì¶”ê°€----
+#------°èÀı Ãß°¡----
 season.data <- c()
-season.data[grep('201.-(12|01|02)-',weather.sales.article.data$ë‚ ì§œ)] <- 'ê²¨ìš¸' #1, 2, 12ì›”ì— í•´ë‹¹í•˜ëŠ” ì¸ë±ìŠ¤ì— ê²¨ìš¸ ì €ì¥
-season.data[grep('201.-(03|04|05)-',weather.sales.article.data$ë‚ ì§œ)] <- 'ë´„'   #3, 4, 5ì›”ì€ ë´„
-season.data[grep('201.-(06|07|08)-',weather.sales.article.data$ë‚ ì§œ)] <- 'ì—¬ë¦„'
-season.data[grep('201.-(09|10|11)-',weather.sales.article.data$ë‚ ì§œ)] <- 'ê°€ì„'
+season.data[grep('201.-(12|01|02)-',weather.sales.article.data$³¯Â¥)] <- '°Ü¿ï' #1, 2, 12¿ù¿¡ ÇØ´çÇÏ´Â ÀÎµ¦½º¿¡ °Ü¿ï ÀúÀå
+season.data[grep('201.-(03|04|05)-',weather.sales.article.data$³¯Â¥)] <- 'º½'   #3, 4, 5¿ùÀº º½
+season.data[grep('201.-(06|07|08)-',weather.sales.article.data$³¯Â¥)] <- '¿©¸§'
+season.data[grep('201.-(09|10|11)-',weather.sales.article.data$³¯Â¥)] <- '°¡À»'
 
 w.s.a.s.data <- weather.sales.article.data 
-w.s.a.s.data$ê³„ì ˆ <- as.factor(season.data) #ê³„ì ˆ column ì¶”ê°€
+w.s.a.s.data$°èÀı <- as.factor(season.data) #°èÀı column Ãß°¡
 View(w.s.a.s.data)
 str(w.s.a.s.data)
 
-#-----ê¸°ì˜¨, ë§¤ì¶œ ì›”ë³„ë¡œ ì •ê·œí™”-----
-#----ê³„ì ˆ ë³„ë¡œ ìƒëŒ€ì ì¸ ì˜¨ë„ë¥¼ êµ¬í•œë‹¤.
+#-----±â¿Â, ¸ÅÃâ ¿ùº°·Î Á¤±ÔÈ­-----
+#----°èÀı º°·Î »ó´ëÀûÀÎ ¿Âµµ¸¦ ±¸ÇÑ´Ù.
 relativeTemp <- c()
 calcTemp <- function(){
-  for(year in 2013:2015){    #2013ë…„ë¶€í„° 2015ë…„     
-    for(month in 1:12){       #1ì›”ë¶€í„° 9ì›”
-      if(year == 2015 && month == 9){ #2015ë…„ì€ 8ì›”ê¹Œì§€ ë°ì´í„°ê°€ ì¡´ì¬í•˜ë¯€ë¡œ ë°˜ë³µë¬¸ ë©ˆì¶¤
+  for(year in 2013:2015){    #2013³âºÎÅÍ 2015³â     
+    for(month in 1:12){       #1¿ùºÎÅÍ 9¿ù
+      if(year == 2015 && month == 9){ #2015³âÀº 8¿ù±îÁö µ¥ÀÌÅÍ°¡ Á¸ÀçÇÏ¹Ç·Î ¹İº¹¹® ¸ØÃã
         break;
       }
-      regex <- paste(as.character(year),'-',sep='')     #ì •ê·œì‹ ë§Œë“¤ê¸°
+      regex <- paste(as.character(year),'-',sep='')     #Á¤±Ô½Ä ¸¸µé±â
       if(month < 10){
         regex <- paste(regex, as.character(month), sep='0')
       }
       else{
         regex <- paste(regex, as.character(month), sep='')
       }
-      temperature.mean <- mean(w.s.a.s.data$ê¸°ì˜¨[grep(regex, w.s.a.s.data$ë‚ ì§œ)])   #ì›”ì˜ í‰ê·  ê¸°ì˜¨
-      season <- w.s.a.s.data$ê³„ì ˆ[grep(regex, w.s.a.s.data$ë‚ ì§œ)[1]]    #ì–´ëŠ ê³„ì ˆì¸ì§€ ì €ì¥
-      if(season == 'ê²¨ìš¸' || season == 'ê°€ì„'){#ê²¨ìš¸, ë´„ì€ í‰ê· ì˜¨ë„ - í˜„ì¬ì˜¨ë„
-        relativeTemp <<- c(relativeTemp, w.s.a.s.data$ê¸°ì˜¨[grep(regex, w.s.a.s.data$ë‚ ì§œ)]-temperature.mean)
+      temperature.mean <- mean(w.s.a.s.data$±â¿Â[grep(regex, w.s.a.s.data$³¯Â¥)])   #¿ùÀÇ Æò±Õ ±â¿Â
+      season <- w.s.a.s.data$°èÀı[grep(regex, w.s.a.s.data$³¯Â¥)[1]]    #¾î´À °èÀıÀÎÁö ÀúÀå
+      if(season == '°Ü¿ï' || season == '°¡À»'){#°Ü¿ï, º½Àº Æò±Õ¿Âµµ - ÇöÀç¿Âµµ
+        relativeTemp <<- c(relativeTemp, w.s.a.s.data$±â¿Â[grep(regex, w.s.a.s.data$³¯Â¥)]-temperature.mean)
       }
-      else{   #ì—¬ë¦„, ê°€ì„ì€ í˜„ì¬ì˜¨ë„ - í‰ê· ì˜¨ë„
-        relativeTemp <<- c(relativeTemp, temperature.mean- w.s.a.s.data$ê¸°ì˜¨[grep(regex, w.s.a.s.data$ë‚ ì§œ)])
+      else{   #¿©¸§, °¡À»Àº ÇöÀç¿Âµµ - Æò±Õ¿Âµµ
+        relativeTemp <<- c(relativeTemp, temperature.mean- w.s.a.s.data$±â¿Â[grep(regex, w.s.a.s.data$³¯Â¥)])
       }
     }
   }
 }
 calcTemp()
-relativeTemp.data.frame <- w.s.a.s.data  #ë°ì´í„° ë³µì‚¬
-relativeTemp.data.frame$ìƒëŒ€ì˜¨ë„ <- relativeTemp #ìƒëŒ€ì˜¨ëŒ€ Column ì¶”ê°€
+relativeTemp.data.frame <- w.s.a.s.data  #µ¥ÀÌÅÍ º¹»ç
+relativeTemp.data.frame$»ó´ë¿Âµµ <- relativeTemp #»ó´ë¿Â´ë Column Ãß°¡
 View(relativeTemp.data.frame)
 
 
 
-#----- ìƒëŒ€ì˜¨ë„ë¥¼ ì •ê·œí™”
+#----- »ó´ë¿Âµµ¸¦ Á¤±ÔÈ­
 normalization <- function(x){
   temp <- (x - mean(x, na.rm= TRUE))/sd(x, na.rm = TRUE)
   return(temp)
@@ -85,12 +85,12 @@ normalization <- function(x){
 relativeTemp.normal <- c()
 
 calcTemp.normal <- function(){
-  for(year in 2013:2015){    #2013ë…„ë¶€í„° 2015ë…„     
-    for(month in 1:12){       #1ì›”ë¶€í„° 9ì›”
-      if(year == 2015 && month == 9){ #2015ë…„ì€ 8ì›”ê¹Œì§€ ë°ì´í„°ê°€ ì¡´ì¬í•˜ë¯€ë¡œ ë°˜ë³µë¬¸ ë©ˆì¶¤
+  for(year in 2013:2015){    #2013³âºÎÅÍ 2015³â     
+    for(month in 1:12){       #1¿ùºÎÅÍ 9¿ù
+      if(year == 2015 && month == 9){ #2015³âÀº 8¿ù±îÁö µ¥ÀÌÅÍ°¡ Á¸ÀçÇÏ¹Ç·Î ¹İº¹¹® ¸ØÃã
         break;
       }
-      regex <- paste(as.character(year),'-',sep='')     #ì •ê·œì‹ ë§Œë“¤ê¸°
+      regex <- paste(as.character(year),'-',sep='')     #Á¤±Ô½Ä ¸¸µé±â
       if(month < 10){
         regex <- paste(regex, as.character(month), sep='0')
       }
@@ -98,104 +98,104 @@ calcTemp.normal <- function(){
         regex <- paste(regex, as.character(month), sep='')
       }
       print(regex)
-      temperature.mean <- mean(w.s.a.s.data$ê¸°ì˜¨[grep(regex, w.s.a.s.data$ë‚ ì§œ)])   #ì›”ì˜ í‰ê·  ê¸°ì˜¨
-      season <- w.s.a.s.data$ê³„ì ˆ[grep(regex, w.s.a.s.data$ë‚ ì§œ)[1]]    #ì–´ëŠ ê³„ì ˆì¸ì§€ ì €ì¥
-      if(season == 'ê²¨ìš¸' || season == 'ê°€ì„'){#ê²¨ìš¸, ë´„ì€ í‰ê· ì˜¨ë„ - í˜„ì¬ì˜¨ë„
-        relativeTemp.normal <<- c(relativeTemp.normal, normalization(w.s.a.s.data$ê¸°ì˜¨[grep(regex, w.s.a.s.data$ë‚ ì§œ)]-temperature.mean))
+      temperature.mean <- mean(w.s.a.s.data$±â¿Â[grep(regex, w.s.a.s.data$³¯Â¥)])   #¿ùÀÇ Æò±Õ ±â¿Â
+      season <- w.s.a.s.data$°èÀı[grep(regex, w.s.a.s.data$³¯Â¥)[1]]    #¾î´À °èÀıÀÎÁö ÀúÀå
+      if(season == '°Ü¿ï' || season == '°¡À»'){#°Ü¿ï, º½Àº Æò±Õ¿Âµµ - ÇöÀç¿Âµµ
+        relativeTemp.normal <<- c(relativeTemp.normal, normalization(w.s.a.s.data$±â¿Â[grep(regex, w.s.a.s.data$³¯Â¥)]-temperature.mean))
       }
-      else{   #ì—¬ë¦„, ê°€ì„ì€ í˜„ì¬ì˜¨ë„ - í‰ê· ì˜¨ë„
-        relativeTemp.normal <<- c(relativeTemp.normal, normalization(temperature.mean- w.s.a.s.data$ê¸°ì˜¨[grep(regex, w.s.a.s.data$ë‚ ì§œ)]))
+      else{   #¿©¸§, °¡À»Àº ÇöÀç¿Âµµ - Æò±Õ¿Âµµ
+        relativeTemp.normal <<- c(relativeTemp.normal, normalization(temperature.mean- w.s.a.s.data$±â¿Â[grep(regex, w.s.a.s.data$³¯Â¥)]))
       }
     }
   }
 }
 calcTemp.normal()
 relativeTemp.normal.data.frame <-relativeTemp.data.frame 
-relativeTemp.normal.data.frame$ìƒëŒ€ì˜¨ë„.ì •ê·œí™” <- relativeTemp.normal
+relativeTemp.normal.data.frame$»ó´ë¿Âµµ.Á¤±ÔÈ­ <- relativeTemp.normal
 View(relativeTemp.normal.data.frame)
 
 
-#-----------ë§¤ì¶œ ì›”ë³„ ì •ê·œí™”
+#-----------¸ÅÃâ ¿ùº° Á¤±ÔÈ­
 sales.normal <- c()
 calcSales.normal <- function(){
-  for(year in 2013:2015){    #2013ë…„ë¶€í„° 2015ë…„     
-    for(month in 1:12){       #1ì›”ë¶€í„° 9ì›”
-      if(year == 2015 && month == 9){ #2015ë…„ì€ 8ì›”ê¹Œì§€ ë°ì´í„°ê°€ ì¡´ì¬í•˜ë¯€ë¡œ ë°˜ë³µë¬¸ ë©ˆì¶¤
+  for(year in 2013:2015){    #2013³âºÎÅÍ 2015³â     
+    for(month in 1:12){       #1¿ùºÎÅÍ 9¿ù
+      if(year == 2015 && month == 9){ #2015³âÀº 8¿ù±îÁö µ¥ÀÌÅÍ°¡ Á¸ÀçÇÏ¹Ç·Î ¹İº¹¹® ¸ØÃã
         break;
       }
-      regex <- paste(as.character(year),'-',sep='')     #ì •ê·œì‹ ë§Œë“¤ê¸°
+      regex <- paste(as.character(year),'-',sep='')     #Á¤±Ô½Ä ¸¸µé±â
       if(month < 10){
         regex <- paste(regex, as.character(month), sep='0')
       }
       else{
         regex <- paste(regex, as.character(month), sep='')
       }
-      sales.mean <- mean(w.s.a.s.data$ë§¤ì¶œ[grep(regex, w.s.a.s.data$ë‚ ì§œ)], na.rm = TRUE)   #ì›”ì˜ í‰ê·  ë§¤ì¶œ
-      sales.normal <<- c(sales.normal, normalization(w.s.a.s.data$ë§¤ì¶œ[grep(regex, w.s.a.s.data$ë‚ ì§œ)]-sales.mean))#ì›”ë³„ í‰ê·  ë§¤ì¶œ - í˜„ì¬ ë§¤ì¶œ -> ì •ê·œí™”
+      sales.mean <- mean(w.s.a.s.data$¸ÅÃâ[grep(regex, w.s.a.s.data$³¯Â¥)], na.rm = TRUE)   #¿ùÀÇ Æò±Õ ¸ÅÃâ
+      sales.normal <<- c(sales.normal, normalization(w.s.a.s.data$¸ÅÃâ[grep(regex, w.s.a.s.data$³¯Â¥)]-sales.mean))#¿ùº° Æò±Õ ¸ÅÃâ - ÇöÀç ¸ÅÃâ -> Á¤±ÔÈ­
     }
   }
 }
 calcSales.normal()
 dst.data.frame <- relativeTemp.normal.data.frame
-dst.data.frame$ìƒëŒ€ë§¤ì¶œ.ì •ê·œí™” <- sales.normal   #ìµœì¢… dataframe ë„ì¶œ
+dst.data.frame$»ó´ë¸ÅÃâ.Á¤±ÔÈ­ <- sales.normal   #ÃÖÁ¾ dataframe µµÃâ
 View(dst.data.frame)
 
 
-#ë§¤ì¶œ êµ°ì§‘í™”
-#ì •ê·œí™”í•œ ë§¤ì¶œì—ì„œ -0.5 ì´í•˜ëŠ” ëª»íŒ”ë¦°ê±°, 0.5ì´ìƒì´ë©´ ì˜ íŒ”ë¦°ê±°
+#¸ÅÃâ ±ºÁıÈ­
+#Á¤±ÔÈ­ÇÑ ¸ÅÃâ¿¡¼­ -0.5 ÀÌÇÏ´Â ¸øÆÈ¸°°Å, 0.5ÀÌ»óÀÌ¸é Àß ÆÈ¸°°Å
 sales.grade <- c()
-sales.grade[dst.data.frame$ìƒëŒ€ë§¤ì¶œ.ì •ê·œí™” > 0.5] <- 'ëŒ€ë°•'
-sales.grade[dst.data.frame$ìƒëŒ€ë§¤ì¶œ.ì •ê·œí™” < -0.5] <- 'ìª½ë°•'
-sales.grade <- ifelse(is.na(sales.grade), 'ì¤‘ë°•', sales.grade) 
-sales.grade <- ifelse(is.na(dst.data.frame$ìƒëŒ€ë§¤ì¶œ.ì •ê·œí™”), NA, sales.grade)
-dst.data.frame$ì¥ì‚¬ <- as.factor(sales.grade)
+sales.grade[dst.data.frame$»ó´ë¸ÅÃâ.Á¤±ÔÈ­ > 0.5] <- '´ë¹Ú'
+sales.grade[dst.data.frame$»ó´ë¸ÅÃâ.Á¤±ÔÈ­ < -0.5] <- 'ÂÊ¹Ú'
+sales.grade <- ifelse(is.na(sales.grade), 'Áß¹Ú', sales.grade) 
+sales.grade <- ifelse(is.na(dst.data.frame$»ó´ë¸ÅÃâ.Á¤±ÔÈ­), NA, sales.grade)
+dst.data.frame$Àå»ç <- as.factor(sales.grade)
 
 View(dst.data.frame)
 str(dst.data.frame)
 
-#-----ì£¼ê°€ ì§€ìˆ˜ ì¶”ê°€
-clothes.data <- read.csv("clothes.csv")   #ì„¬ìœ  ì£¼ê°€ ì½ê¸°
-dst.data.frame$ì„¬ìœ  <- clothes.data$ì‹œê°€ì§€ìˆ˜  #column ì¶”ê°€
+#-----ÁÖ°¡ Áö¼ö Ãß°¡
+clothes.data <- read.csv("clothes.csv")   #¼¶À¯ ÁÖ°¡ ÀĞ±â
+dst.data.frame$¼¶À¯ <- clothes.data$½Ã°¡Áö¼ö  #column Ãß°¡
 View(dst.data.frame)
 
-kospi.data <- read.csv("kospi.csv")  #ì‹œê°€ì§€ìˆ˜ê°€ factorë¡œ ì €ì¥ë˜ì–´ ìˆìŒ.
-kospi.data$ì‹œê°€ì§€ìˆ˜ <- as.character(kospi.data$ì‹œê°€ì§€ìˆ˜)
-kospi.data$ì‹œê°€ì§€ìˆ˜ <- as.numeric(gsub(",", "", kospi.data$ì‹œê°€ì§€ìˆ˜))
-dst.data.frame$ì½”ìŠ¤í”¼ <- as.numeric(kospi.data$ì‹œê°€ì§€ìˆ˜)
+kospi.data <- read.csv("kospi.csv")  #½Ã°¡Áö¼ö°¡ factor·Î ÀúÀåµÇ¾î ÀÖÀ½.
+kospi.data$½Ã°¡Áö¼ö <- as.character(kospi.data$½Ã°¡Áö¼ö)
+kospi.data$½Ã°¡Áö¼ö <- as.numeric(gsub(",", "", kospi.data$½Ã°¡Áö¼ö))
+dst.data.frame$ÄÚ½ºÇÇ <- as.numeric(kospi.data$½Ã°¡Áö¼ö)
 View(dst.data.frame)
 
-#------ì½”ìŠ¤ë‹¥ ë¹ ì§„ ë‚  ë„£ê¸°
+#------ÄÚ½º´Ú ºüÁø ³¯ ³Ö±â
 kosdaq.data <- read.csv('kosdaq.csv')
 dst.kosdaq.data <- c()
 setKOSDAQ <- function(){
   for(date in 1:nrow(dst.data.frame)){
-    index <- grep(dst.data.frame$ë‚ ì§œ[date], kosdaq.data$ì¼ì)
+    index <- grep(dst.data.frame$³¯Â¥[date], kosdaq.data$ÀÏÀÚ)
     tmp <- kosdaq.data[index,]
     if(nrow(tmp) == 0){
       dst.kosdaq.data <<- c(dst.kosdaq.data, dst.kosdaq.data[date-1])
     }
     else{
-      dst.kosdaq.data <<- c(dst.kosdaq.data, kosdaq.data$ì‹œê°€ì§€ìˆ˜[index])
+      dst.kosdaq.data <<- c(dst.kosdaq.data, kosdaq.data$½Ã°¡Áö¼ö[index])
     }
   }
 }
 setKOSDAQ()
-dst.data.frame$ì½”ìŠ¤ë‹¥ <- dst.kosdaq.data
+dst.data.frame$ÄÚ½º´Ú <- dst.kosdaq.data
 View(dst.data.frame)
 
-#----- ê³µíœ´ì¼ ì¶”ê°€
+#----- °øÈŞÀÏ Ãß°¡
 holiday.data <- read.csv("holiday.csv")
 
-dst.data.frame$ê³µíœ´ì¼ <- holiday.data$ê³µíœ´ì¼
-dst.data.frame$ì—°íœ´ <- holiday.data$bh_bigtosmall
+dst.data.frame$°øÈŞÀÏ <- holiday.data$°øÈŞÀÏ
+dst.data.frame$¿¬ÈŞ <- holiday.data$bh_bigtosmall
 
 View(dst.data.frame)
 
 
-#---------- ê¸°ì‚¬ ê°ì„±íŒë‹¨ ë°ì´í„° ì¶”ê°€-----
-#---- ê¸ì •, ë¶€ì • ê¸°ì‚¬ ê°œìˆ˜
+#---------- ±â»ç °¨¼ºÆÇ´Ü µ¥ÀÌÅÍ Ãß°¡-----
+#---- ±àÁ¤, ºÎÁ¤ ±â»ç °³¼ö
 article_sentiment_count <- read.csv("article_sentiment.csv")
-colnames(article_sentiment_count) <- c('ë‚ ì§œ', 'ë¶„ë¥˜', 'ê¸ì •ì–´íœ˜ê°œìˆ˜', 'ë¶€ì •ì–´íœ˜ê°œìˆ˜', 'ì¤‘ë¦½ì–´íœ˜ê°œìˆ˜')
+colnames(article_sentiment_count) <- c('³¯Â¥', 'ºĞ·ù', '±àÁ¤¾îÈÖ°³¼ö', 'ºÎÁ¤¾îÈÖ°³¼ö', 'Áß¸³¾îÈÖ°³¼ö')
 posi.article.count <- c()
 nega.article.count <- c()
 calcSentiArticle <- function(){
@@ -219,13 +219,13 @@ calcSentiArticle <- function(){
         else{
           regex <- paste(regex, as.character(day), sep = '')
         }
-        tmp <- article_sentiment_count[grep(regex, article_sentiment_count$ë‚ ì§œ),] #ë‚ ì§œë³„ë¡œ ëª¨ìŒ
+        tmp <- article_sentiment_count[grep(regex, article_sentiment_count$³¯Â¥),] #³¯Â¥º°·Î ¸ğÀ½
         if(nrow(tmp) == 0){
           print(regex)
         }
         else{
-          posi.article.count <<- c(posi.article.count, nrow(tmp[tmp$ê¸ì •ì–´íœ˜ê°œìˆ˜ > tmp$ë¶€ì •ì–´íœ˜ê°œìˆ˜,]))
-          nega.article.count <<- c(nega.article.count, nrow(tmp[tmp$ê¸ì •ì–´íœ˜ê°œìˆ˜ <= tmp$ë¶€ì •ì–´íœ˜ê°œìˆ˜,]))
+          posi.article.count <<- c(posi.article.count, nrow(tmp[tmp$±àÁ¤¾îÈÖ°³¼ö > tmp$ºÎÁ¤¾îÈÖ°³¼ö,]))
+          nega.article.count <<- c(nega.article.count, nrow(tmp[tmp$±àÁ¤¾îÈÖ°³¼ö <= tmp$ºÎÁ¤¾îÈÖ°³¼ö,]))
         }
       }
     }
@@ -235,17 +235,17 @@ calcSentiArticle()
 posi.article.count <- c(0, posi.article.count)
 nega.article.count <- c(0, nega.article.count)
 
-dst.data.frame$ê¸ì •ê¸°ì‚¬ê°œìˆ˜ <- posi.article.count
-dst.data.frame$ë¶€ì •ê¸°ì‚¬ê°œìˆ˜ <- nega.article.count
+dst.data.frame$±àÁ¤±â»ç°³¼ö <- posi.article.count
+dst.data.frame$ºÎÁ¤±â»ç°³¼ö <- nega.article.count
 View(dst.data.frame)
-#----ê¸ì •, ë¶€ì • ì–´íœ˜ ë¹„ìœ¨
+#----±àÁ¤, ºÎÁ¤ ¾îÈÖ ºñÀ²
 sentiword.rate <- read.csv("sentiword_rate.csv")
 
-dst.data.frame$ê¸ì •ì–´íœ˜ë¹„ìœ¨ <- sentiword.rate$ê¸ì •ë¹„ìœ¨
-dst.data.frame$ë¶€ì •ì–´íœ˜ë¹„ìœ¨ <- sentiword.rate$ë¶€ì •ë¹„ìœ¨
+dst.data.frame$±àÁ¤¾îÈÖºñÀ² <- sentiword.rate$±àÁ¤ºñÀ²
+dst.data.frame$ºÎÁ¤¾îÈÖºñÀ² <- sentiword.rate$ºÎÁ¤ºñÀ²
 View(dst.data.frame)
 
-#-------ë‚ ì§œ ë°ì´í„°
+#-------³¯Â¥ µ¥ÀÌÅÍ
 day2 <- c();
 abstractDay <- c();
 setDay <- function(){
@@ -269,19 +269,19 @@ setDay <- function(){
         else{
           regex <- paste(regex, as.character(day), sep = '')
         }
-        if(nrow(dst.data.frame[grep(regex, dst.data.frame$ë‚ ì§œ),]) == 0){
+        if(nrow(dst.data.frame[grep(regex, dst.data.frame$³¯Â¥),]) == 0){
           print(regex)
         }
         else{
           day2 <<- c(day2, day)
           if(day <= 10){
-            abstractDay <<- c(abstractDay, 'ì´ˆìˆœ')
+            abstractDay <<- c(abstractDay, 'ÃÊ¼ø')
           }
           else if(day <= 20){
-            abstractDay <<- c(abstractDay, 'ì¤‘ìˆœ')
+            abstractDay <<- c(abstractDay, 'Áß¼ø')
           }
           else{
-            abstractDay <<- c(abstractDay, 'í•˜ìˆœ')
+            abstractDay <<- c(abstractDay, 'ÇÏ¼ø')
           }
         }
       }
@@ -290,25 +290,24 @@ setDay <- function(){
 }
 
 setDay()
-dst.data.frame$ì¼ <- day2
-dst.data.frame$ì›”ì¤‘ <- as.factor(abstractDay)
+dst.data.frame$ÀÏ <- day2
+dst.data.frame$¿ùÁß <- as.factor(abstractDay)
 View(dst.data.frame)
 
-#--------- ì „ë‚  ì¼ê¸° ì˜ˆë³´ ----
-#ê°•ìˆ˜ëŸ‰ í•˜ë£¨ì”© ë•¡ê¸°ê¸°
-prev.precipitation <- dst.data.frame$ê°•ìˆ˜ëŸ‰
+#--------- Àü³¯ ÀÏ±â ¿¹º¸ ----
+#°­¼ö·® ÇÏ·ç¾¿ ¶¯±â±â
+prev.precipitation <- dst.data.frame$°­¼ö·®
 prev.precipitation <- c(prev.precipitation , 0)
 prev.precipitation <- prev.precipitation[-1]
 
-dst.data.frame$ì¼ê¸°ì˜ˆë³´ <- prev.precipitation
+dst.data.frame$ÀÏ±â¿¹º¸ <- prev.precipitation
 View(dst.data.frame)
-#--------ì´ìƒí•œ ë‚ 
+#--------ÀÌ»óÇÑ ³¯
 
 abnormalDate <- read.csv('abnormal_date.csv')
-dst.data.frame$ì´ìƒì¹˜ <- abnormalDate$ì´ìƒì¹˜ê¸°ë…ì¼
+dst.data.frame$ÀÌ»óÄ¡ <- abnormalDate$ÀÌ»óÄ¡±â³äÀÏ
 View(dst.data.frame)
 
-#------------------ìµœì¢… ë°ì´í„° í”„ë ˆì„ ì¶œë ¥
+#------------------ÃÖÁ¾ µ¥ÀÌÅÍ ÇÁ·¹ÀÓ Ãâ·Â
 View(dst.data.frame)
 write.csv(dst.data.frame, 'dst_data_frame.csv')
-

@@ -177,6 +177,7 @@ select.column <- c("요일", "습도", "강수량", "일사량","이상치", "일조량", "풍속"
 obj.view <- subset(dst.data.frame, select = select.column)
 m <- lm(매출 ~., data = obj.view,  use = "pairwise.complete.obs")
 m2 <- step(m , direction = "both")
+m2
 summary(m2)
 
 #-------- 전체 매출 예상
